@@ -166,4 +166,12 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
             $this->workbookManager->close($this->filePointer);
         }
     }
+
+
+
+
+    public function getCurrentWorksheet()
+    {
+        return $this->workbookManager->getCurrentWorksheet();
+    }
 }

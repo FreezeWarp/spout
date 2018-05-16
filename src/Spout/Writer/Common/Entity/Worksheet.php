@@ -23,6 +23,9 @@ class Worksheet
     /** @var int Index of the last written row */
     private $lastWrittenRowIndex;
 
+    /** @var int Array of arbirary options */
+    private $options;
+
     /**
      * Worksheet constructor.
      *
@@ -109,5 +112,16 @@ class Worksheet
     {
         // sheet index is zero-based, while ID is 1-based
         return $this->externalSheet->getIndex() + 1;
+    }
+
+
+    public function setOption($name, $value)
+    {
+        $this->options[$name] = $value;
+    }
+
+    public function getOption($name)
+    {
+        return $this->options[$name];
     }
 }

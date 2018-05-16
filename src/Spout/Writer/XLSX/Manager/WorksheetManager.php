@@ -62,6 +62,9 @@ EOD;
     /** @var InternalEntityFactory Factory to create entities */
     private $entityFactory;
 
+    /** @var int The highest number of columns in any row. */
+    private $maxColumns = 0;
+
     /**
      * WorksheetManager constructor.
      *
@@ -85,6 +88,7 @@ EOD;
         InternalEntityFactory $entityFactory
     ) {
         $this->shouldUseInlineStrings = $optionsManager->getOption(Options::SHOULD_USE_INLINE_STRINGS);
+        $this->optionsManager = $optionsManager;
         $this->rowManager = $rowManager;
         $this->styleManager = $styleManager;
         $this->styleMerger = $styleMerger;
@@ -104,6 +108,7 @@ EOD;
 
     /**
      * {@inheritdoc}
+     * TODO: sheetView should be boolean, enabled by default; cols should be exposed via createSheet, I recommend connecting using headers
      */
     public function startSheet(Worksheet $worksheet)
     {
@@ -113,6 +118,33 @@ EOD;
         $worksheet->setFilePointer($sheetFilePointer);
 
         fwrite($sheetFilePointer, self::SHEET_XML_FILE_HEADER);
+
+/*        fwrite($sheetFilePointer, '<sheetViews>
+    <sheetView tabSelected="1" workbookViewId="0">
+        <pane xSplit="1" ySplit="1" topLeftCell="B2" activePane="bottomRight" state="frozen" />
+        <selection pane="topRight" activeCell="B1" sqref="B1"/>
+        <selection pane="bottomLeft" activeCell="A2" sqref="A2"/>
+        <selection pane="bottomRight" activeCell="K9" sqref="K9"/>
+    </sheetView>
+</sheetViews>');
+
+        fwrite($sheetFilePointer, '
+<cols>
+    <col min="1" max="4" width="15" customWidth="1" />
+    <col min="5" max="50" width="50" customWidth="1" />
+</cols>');*/
+
+/*        if(!empty($columnwidths)) {
+            foreach($columnwidths as $c) {
+                fwrite($this->sheetFilePointer,
+        '<cols><col min="' . $c['min'] .
+                    '" max="' . $c['max'] .
+                    '" width="' . $c['width'] .
+                    '" customWidth="1"/></cols>'
+                );
+            }
+        }*/
+
         fwrite($sheetFilePointer, '<sheetData>');
     }
 
@@ -157,6 +189,7 @@ EOD;
         $rowStyle = $row->getStyle();
         $rowIndex = $worksheet->getLastWrittenRowIndex() + 1;
         $numCells = $row->getNumCells();
+        $this->maxColumns = max($this->maxColumns, $numCells);
 
         $rowXML = '<row r="' . $rowIndex . '" spans="1:' . $numCells . '">';
 
@@ -268,6 +301,34 @@ EOD;
         }
 
         fwrite($worksheetFilePointer, '</sheetData>');
+
+        if ($worksheet->getOption('filter') && $this->maxColumns) {
+            fwrite($worksheetFilePointer, '<autoFilter ref="A1:' . chr(64 + $this->maxColumns) . '1"/>');
+        }
+
+        if ($worksheet->getOption('freeze_pane')) {
+            fwrite($worksheetFilePointer, '
+                <sheetViews>
+                    <sheetView tabSelected="1" workbookViewId="0">
+                        <pane xSplit="1" ySplit="1" topLeftCell="B2" activePane="bottomRight" state="frozen" />
+                        <selection pane="topRight" activeCell="B1" sqref="B1"/>
+                        <selection pane="bottomLeft" activeCell="A2" sqref="A2"/>
+                        <selection pane="bottomRight" activeCell="K9" sqref="K9"/>
+                    </sheetView>
+                </sheetViews>
+            ');
+        }
+
+        if ($this->optionsManager->getOption('column_widths')) {
+            fwrite($worksheetFilePointer, '<cols>');
+
+            foreach ($this->optionsManager->getOption('column_widths') AS $i => $width) {
+                fwrite($worksheetFilePointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" width="' . $width . '" customWidth="1" />');
+            }
+
+            fwrite($worksheetFilePointer, '</cols>');
+        }
+
         fwrite($worksheetFilePointer, '</worksheet>');
         fclose($worksheetFilePointer);
     }
