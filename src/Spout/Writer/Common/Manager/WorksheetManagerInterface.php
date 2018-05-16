@@ -29,7 +29,7 @@ interface WorksheetManagerInterface
      * @throws \Box\Spout\Common\Exception\IOException If the sheet data file cannot be opened for writing
      * @return void
      */
-    public function startSheet(Worksheet $worksheet);
+    public function startSheet(Worksheet $worksheet, $options = []);
 
     /**
      * Closes the worksheet

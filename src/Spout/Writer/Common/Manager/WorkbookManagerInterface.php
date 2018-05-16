@@ -28,7 +28,7 @@ interface WorkbookManagerInterface
      * @throws IOException If unable to open the sheet for writing
      * @return Worksheet The created sheet
      */
-    public function addNewSheetAndMakeItCurrent();
+    public function addNewSheetAndMakeItCurrent($options = []);
 
     /**
      * @return Worksheet[] All the workbook's sheets

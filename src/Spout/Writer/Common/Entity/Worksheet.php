@@ -23,7 +23,7 @@ class Worksheet
     /** @var int Index of the last written row */
     private $lastWrittenRowIndex;
 
-    /** @var int Array of arbirary options */
+    /** @var int Array of arbitrary options */
     private $options;
 
     /**
@@ -122,6 +122,6 @@ class Worksheet
 
     public function getOption($name)
     {
-        return $this->options[$name];
+        return $this->options[$name] ?? null;
     }
 }

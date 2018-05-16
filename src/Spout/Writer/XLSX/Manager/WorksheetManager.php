@@ -88,7 +88,6 @@ EOD;
         InternalEntityFactory $entityFactory
     ) {
         $this->shouldUseInlineStrings = $optionsManager->getOption(Options::SHOULD_USE_INLINE_STRINGS);
-        $this->optionsManager = $optionsManager;
         $this->rowManager = $rowManager;
         $this->styleManager = $styleManager;
         $this->styleMerger = $styleMerger;
@@ -110,40 +109,42 @@ EOD;
      * {@inheritdoc}
      * TODO: sheetView should be boolean, enabled by default; cols should be exposed via createSheet, I recommend connecting using headers
      */
-    public function startSheet(Worksheet $worksheet)
+    public function startSheet(Worksheet $worksheet, $options = [])
     {
         $sheetFilePointer = fopen($worksheet->getFilePath(), 'w');
         $this->throwIfSheetFilePointerIsNotAvailable($sheetFilePointer);
 
         $worksheet->setFilePointer($sheetFilePointer);
+        foreach ($options AS $option => $value) {
+            $worksheet->setOption($option, $value);
+        }
 
         fwrite($sheetFilePointer, self::SHEET_XML_FILE_HEADER);
 
-/*        fwrite($sheetFilePointer, '<sheetViews>
-    <sheetView tabSelected="1" workbookViewId="0">
-        <pane xSplit="1" ySplit="1" topLeftCell="B2" activePane="bottomRight" state="frozen" />
-        <selection pane="topRight" activeCell="B1" sqref="B1"/>
-        <selection pane="bottomLeft" activeCell="A2" sqref="A2"/>
-        <selection pane="bottomRight" activeCell="K9" sqref="K9"/>
-    </sheetView>
-</sheetViews>');
+        if (!empty($options['freeze_pane']) || true) {
+            fwrite($sheetFilePointer, '
+                <sheetViews>
+                    <sheetView tabSelected="1" workbookViewId="0">
+                        <pane xSplit="1" ySplit="1" topLeftCell="B2" activePane="bottomRight" state="frozen" />
+                        <selection pane="topRight" activeCell="B1" sqref="B1"/>
+                        <selection pane="bottomLeft" activeCell="A2" sqref="A2"/>
+                        <selection pane="bottomRight" activeCell="K9" sqref="K9"/>
+                    </sheetView>
+                </sheetViews>
+            ');
+        }
 
-        fwrite($sheetFilePointer, '
-<cols>
-    <col min="1" max="4" width="15" customWidth="1" />
-    <col min="5" max="50" width="50" customWidth="1" />
-</cols>');*/
+        if (!empty($options['column_widths'])) {
+            fwrite($sheetFilePointer, '<cols>');
 
-/*        if(!empty($columnwidths)) {
-            foreach($columnwidths as $c) {
-                fwrite($this->sheetFilePointer,
-        '<cols><col min="' . $c['min'] .
-                    '" max="' . $c['max'] .
-                    '" width="' . $c['width'] .
-                    '" customWidth="1"/></cols>'
-                );
+            foreach ($options['column_widths'] AS $i => $width) {
+                if ($width) {
+                    fwrite($sheetFilePointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" width="' . $width . '" customWidth="1" />');
+                }
             }
-        }*/
+
+            fwrite($sheetFilePointer, '</cols>');
+        }
 
         fwrite($sheetFilePointer, '<sheetData>');
     }
@@ -302,31 +303,20 @@ EOD;
 
         fwrite($worksheetFilePointer, '</sheetData>');
 
-        if ($worksheet->getOption('filter') && $this->maxColumns) {
-            fwrite($worksheetFilePointer, '<autoFilter ref="A1:' . chr(64 + $this->maxColumns) . '1"/>');
-        }
+        if ($worksheet->getOption('filter') && $worksheet->getMaxNumColumns()) {
+            fwrite($worksheetFilePointer, '<autoFilter ref="A1:AZ1"/>');
 
-        if ($worksheet->getOption('freeze_pane')) {
-            fwrite($worksheetFilePointer, '
-                <sheetViews>
-                    <sheetView tabSelected="1" workbookViewId="0">
-                        <pane xSplit="1" ySplit="1" topLeftCell="B2" activePane="bottomRight" state="frozen" />
-                        <selection pane="topRight" activeCell="B1" sqref="B1"/>
-                        <selection pane="bottomLeft" activeCell="A2" sqref="A2"/>
-                        <selection pane="bottomRight" activeCell="K9" sqref="K9"/>
-                    </sheetView>
-                </sheetViews>
-            ');
-        }
+//            fwrite($worksheetFilePointer, '<autoFilter ref="A1:' . chr(64 + $worksheet->getMaxNumColumns()) . '1"/>');
+/*            $ref = [];
 
-        if ($this->optionsManager->getOption('column_widths')) {
-            fwrite($worksheetFilePointer, '<cols>');
-
-            foreach ($this->optionsManager->getOption('column_widths') AS $i => $width) {
-                fwrite($worksheetFilePointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" width="' . $width . '" customWidth="1" />');
+            // TODO: only goes to 26
+            $cols = $worksheet->getOption('filter');
+            foreach ($cols AS $columnNum) {
+                $ref[] = chr(65 + $columnNum) . '1:' . chr(65 + $columnNum) . '1';
             }
 
-            fwrite($worksheetFilePointer, '</cols>');
+            $ref = implode(';', $ref);
+            fwrite($worksheetFilePointer, "<autoFilter ref=\"$ref\"/>");*/
         }
 
         fwrite($worksheetFilePointer, '</worksheet>');

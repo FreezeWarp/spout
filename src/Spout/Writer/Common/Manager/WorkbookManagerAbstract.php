@@ -106,9 +106,9 @@ abstract class WorkbookManagerAbstract implements WorkbookManagerInterface
      * @throws IOException If unable to open the sheet for writing
      * @return Worksheet The created sheet
      */
-    public function addNewSheetAndMakeItCurrent()
+    public function addNewSheetAndMakeItCurrent($options = [])
     {
-        $worksheet = $this->addNewSheet();
+        $worksheet = $this->addNewSheet($options);
         $this->setCurrentWorksheet($worksheet);
 
         return $worksheet;
@@ -120,7 +120,7 @@ abstract class WorkbookManagerAbstract implements WorkbookManagerInterface
      * @throws \Box\Spout\Common\Exception\IOException If unable to open the sheet for writing
      * @return Worksheet The created sheet
      */
-    private function addNewSheet()
+    private function addNewSheet($options)
     {
         $worksheets = $this->getWorksheets();
 
@@ -131,7 +131,7 @@ abstract class WorkbookManagerAbstract implements WorkbookManagerInterface
         $worksheetFilePath = $this->getWorksheetFilePath($sheet);
         $worksheet = $this->entityFactory->createWorksheet($worksheetFilePath, $sheet);
 
-        $this->worksheetManager->startSheet($worksheet);
+        $this->worksheetManager->startSheet($worksheet, $options);
 
         $worksheets[] = $worksheet;
         $this->workbook->setWorksheets($worksheets);

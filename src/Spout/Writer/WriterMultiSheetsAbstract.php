@@ -68,7 +68,6 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
     {
         if (!$this->workbookManager) {
             $this->workbookManager = $this->managerFactory->createWorkbookManager($this->optionsManager);
-            $this->workbookManager->addNewSheetAndMakeItCurrent();
         }
     }
 
@@ -99,10 +98,10 @@ abstract class WriterMultiSheetsAbstract extends WriterAbstract
      * @throws WriterNotOpenedException If the writer has not been opened yet
      * @return Sheet The created sheet
      */
-    public function addNewSheetAndMakeItCurrent()
+    public function addNewSheetAndMakeItCurrent($options = [])
     {
         $this->throwIfWorkbookIsNotAvailable();
-        $worksheet = $this->workbookManager->addNewSheetAndMakeItCurrent();
+        $worksheet = $this->workbookManager->addNewSheetAndMakeItCurrent($options);
 
         return $worksheet->getExternalSheet();
     }
