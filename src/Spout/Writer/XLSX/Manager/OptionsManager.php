@@ -1,10 +1,10 @@
 <?php
 
-namespace Box\Spout\Writer\XLSX\Manager;
+namespace Box\Spout3\Writer\XLSX\Manager;
 
-use Box\Spout\Common\Manager\OptionsManagerAbstract;
-use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
-use Box\Spout\Writer\Common\Entity\Options;
+use Box\Spout3\Common\Manager\OptionsManagerAbstract;
+use Box\Spout3\Writer\Common\Creator\Style\StyleBuilder;
+use Box\Spout3\Writer\Common\Entity\Options;
 
 /**
  * Class OptionsManager

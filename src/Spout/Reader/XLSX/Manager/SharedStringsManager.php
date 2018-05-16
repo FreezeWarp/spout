@@ -1,14 +1,14 @@
 <?php
 
-namespace Box\Spout\Reader\XLSX\Manager;
+namespace Box\Spout3\Reader\XLSX\Manager;
 
-use Box\Spout\Common\Exception\IOException;
-use Box\Spout\Reader\Exception\XMLProcessingException;
-use Box\Spout\Reader\Wrapper\XMLReader;
-use Box\Spout\Reader\XLSX\Creator\HelperFactory;
-use Box\Spout\Reader\XLSX\Creator\InternalEntityFactory;
-use Box\Spout\Reader\XLSX\Manager\SharedStringsCaching\CachingStrategyFactory;
-use Box\Spout\Reader\XLSX\Manager\SharedStringsCaching\CachingStrategyInterface;
+use Box\Spout3\Common\Exception\IOException;
+use Box\Spout3\Reader\Exception\XMLProcessingException;
+use Box\Spout3\Reader\Wrapper\XMLReader;
+use Box\Spout3\Reader\XLSX\Creator\HelperFactory;
+use Box\Spout3\Reader\XLSX\Creator\InternalEntityFactory;
+use Box\Spout3\Reader\XLSX\Manager\SharedStringsCaching\CachingStrategyFactory;
+use Box\Spout3\Reader\XLSX\Manager\SharedStringsCaching\CachingStrategyInterface;
 
 /**
  * Class SharedStringsManager
@@ -96,7 +96,7 @@ class SharedStringsManager
      * The XML file can be really big with sheets containing a lot of data. That is why
      * we need to use a XML reader that provides streaming like the XMLReader library.
      *
-     * @throws \Box\Spout\Common\Exception\IOException If shared strings XML file can't be read
+     * @throws \Box\Spout3\Common\Exception\IOException If shared strings XML file can't be read
      * @return void
      */
     public function extractSharedStrings()
@@ -134,8 +134,8 @@ class SharedStringsManager
     /**
      * Returns the shared strings unique count, as specified in <sst> tag.
      *
-     * @param \Box\Spout\Reader\Wrapper\XMLReader $xmlReader XMLReader instance
-     * @throws \Box\Spout\Common\Exception\IOException If sharedStrings.xml is invalid and can't be read
+     * @param \Box\Spout3\Reader\Wrapper\XMLReader $xmlReader XMLReader instance
+     * @throws \Box\Spout3\Common\Exception\IOException If sharedStrings.xml is invalid and can't be read
      * @return int|null Number of unique shared strings in the sharedStrings.xml file
      */
     protected function getSharedStringsUniqueCount($xmlReader)
@@ -173,7 +173,7 @@ class SharedStringsManager
     /**
      * Processes the shared strings item XML node which the given XML reader is positioned on.
      *
-     * @param \Box\Spout\Reader\Wrapper\XMLReader $xmlReader XML Reader positioned on a "<si>" node
+     * @param \Box\Spout3\Reader\Wrapper\XMLReader $xmlReader XML Reader positioned on a "<si>" node
      * @param int $sharedStringIndex Index of the processed shared strings item
      * @return void
      */
@@ -229,7 +229,7 @@ class SharedStringsManager
      * Returns the shared string at the given index, using the previously chosen caching strategy.
      *
      * @param int $sharedStringIndex Index of the shared string in the sharedStrings.xml file
-     * @throws \Box\Spout\Reader\Exception\SharedStringNotFoundException If no shared string found for the given index
+     * @throws \Box\Spout3\Reader\Exception\SharedStringNotFoundException If no shared string found for the given index
      * @return string The shared string at the given index
      */
     public function getStringAtIndex($sharedStringIndex)

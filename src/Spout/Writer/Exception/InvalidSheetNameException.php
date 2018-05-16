@@ -1,6 +1,6 @@
 <?php
 
-namespace Box\Spout\Writer\Exception;
+namespace Box\Spout3\Writer\Exception;
 
 /**
  * Class InvalidSheetNameException

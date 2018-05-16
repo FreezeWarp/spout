@@ -1,10 +1,10 @@
 <?php
 
-namespace Box\Spout\Reader\XLSX\Helper;
+namespace Box\Spout3\Reader\XLSX\Helper;
 
-use Box\Spout\Reader\Exception\InvalidValueException;
-use Box\Spout\Reader\XLSX\Manager\SharedStringsManager;
-use Box\Spout\Reader\XLSX\Manager\StyleManager;
+use Box\Spout3\Reader\Exception\InvalidValueException;
+use Box\Spout3\Reader\XLSX\Manager\SharedStringsManager;
+use Box\Spout3\Reader\XLSX\Manager\StyleManager;
 
 /**
  * Class CellValueFormatter
@@ -52,7 +52,7 @@ class CellValueFormatter
     /** @var bool Whether date/time values should use a calendar starting in 1904 instead of 1900 */
     protected $shouldUse1904Dates;
 
-    /** @var \Box\Spout\Common\Helper\Escaper\XLSX Used to unescape XML data */
+    /** @var \Box\Spout3\Common\Helper\Escaper\XLSX Used to unescape XML data */
     protected $escaper;
 
     /**
@@ -60,7 +60,7 @@ class CellValueFormatter
      * @param StyleManager $styleManager Manages styles
      * @param bool $shouldFormatDates Whether date/time values should be returned as PHP objects or be formatted as strings
      * @param bool $shouldUse1904Dates Whether date/time values should use a calendar starting in 1904 instead of 1900
-     * @param \Box\Spout\Common\Helper\Escaper\XLSX $escaper Used to unescape XML data
+     * @param \Box\Spout3\Common\Helper\Escaper\XLSX $escaper Used to unescape XML data
      */
     public function __construct($sharedStringsManager, $styleManager, $shouldFormatDates, $shouldUse1904Dates, $escaper)
     {

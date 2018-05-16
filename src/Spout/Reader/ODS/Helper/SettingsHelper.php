@@ -1,9 +1,9 @@
 <?php
 
-namespace Box\Spout\Reader\ODS\Helper;
+namespace Box\Spout3\Reader\ODS\Helper;
 
-use Box\Spout\Reader\Exception\XMLProcessingException;
-use Box\Spout\Reader\ODS\Creator\InternalEntityFactory;
+use Box\Spout3\Reader\Exception\XMLProcessingException;
+use Box\Spout3\Reader\ODS\Creator\InternalEntityFactory;
 
 /**
  * Class SettingsHelper

@@ -1,6 +1,6 @@
 <?php
 
-namespace Box\Spout\Reader\Exception;
+namespace Box\Spout3\Reader\Exception;
 
 /**
  * Class XMLProcessingException

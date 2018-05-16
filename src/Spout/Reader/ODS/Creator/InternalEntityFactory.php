@@ -1,16 +1,16 @@
 <?php
 
-namespace Box\Spout\Reader\ODS\Creator;
+namespace Box\Spout3\Reader\ODS\Creator;
 
-use Box\Spout\Common\Entity\Cell;
-use Box\Spout\Common\Entity\Row;
-use Box\Spout\Reader\Common\Creator\InternalEntityFactoryInterface;
-use Box\Spout\Reader\Common\Entity\Options;
-use Box\Spout\Reader\Common\XMLProcessor;
-use Box\Spout\Reader\ODS\RowIterator;
-use Box\Spout\Reader\ODS\Sheet;
-use Box\Spout\Reader\ODS\SheetIterator;
-use Box\Spout\Reader\Wrapper\XMLReader;
+use Box\Spout3\Common\Entity\Cell;
+use Box\Spout3\Common\Entity\Row;
+use Box\Spout3\Reader\Common\Creator\InternalEntityFactoryInterface;
+use Box\Spout3\Reader\Common\Entity\Options;
+use Box\Spout3\Reader\Common\XMLProcessor;
+use Box\Spout3\Reader\ODS\RowIterator;
+use Box\Spout3\Reader\ODS\Sheet;
+use Box\Spout3\Reader\ODS\SheetIterator;
+use Box\Spout3\Reader\Wrapper\XMLReader;
 
 /**
  * Class EntityFactory
@@ -36,7 +36,7 @@ class InternalEntityFactory implements InternalEntityFactoryInterface
 
     /**
      * @param string $filePath Path of the file to be read
-     * @param \Box\Spout\Common\Manager\OptionsManagerInterface $optionsManager Reader's options manager
+     * @param \Box\Spout3\Common\Manager\OptionsManagerInterface $optionsManager Reader's options manager
      * @return SheetIterator
      */
     public function createSheetIterator($filePath, $optionsManager)
@@ -53,7 +53,7 @@ class InternalEntityFactory implements InternalEntityFactoryInterface
      * @param string $sheetName Name of the sheet
      * @param bool $isSheetActive Whether the sheet was defined as active
      * @param bool $isSheetVisible Whether the sheet is visible
-     * @param \Box\Spout\Common\Manager\OptionsManagerInterface $optionsManager Reader's options manager
+     * @param \Box\Spout3\Common\Manager\OptionsManagerInterface $optionsManager Reader's options manager
      * @return Sheet
      */
     public function createSheet($xmlReader, $sheetIndex, $sheetName, $isSheetActive, $isSheetVisible, $optionsManager)
@@ -65,7 +65,7 @@ class InternalEntityFactory implements InternalEntityFactoryInterface
 
     /**
      * @param XMLReader $xmlReader XML Reader
-     * @param \Box\Spout\Common\Manager\OptionsManagerInterface $optionsManager Reader's options manager
+     * @param \Box\Spout3\Common\Manager\OptionsManagerInterface $optionsManager Reader's options manager
      * @return RowIterator
      */
     private function createRowIterator($xmlReader, $optionsManager)

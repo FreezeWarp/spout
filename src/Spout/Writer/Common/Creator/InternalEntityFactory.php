@@ -1,11 +1,11 @@
 <?php
 
-namespace Box\Spout\Writer\Common\Creator;
+namespace Box\Spout3\Writer\Common\Creator;
 
-use Box\Spout\Writer\Common\Entity\Sheet;
-use Box\Spout\Writer\Common\Entity\Workbook;
-use Box\Spout\Writer\Common\Entity\Worksheet;
-use Box\Spout\Writer\Common\Manager\SheetManager;
+use Box\Spout3\Writer\Common\Entity\Sheet;
+use Box\Spout3\Writer\Common\Entity\Workbook;
+use Box\Spout3\Writer\Common\Entity\Worksheet;
+use Box\Spout3\Writer\Common\Manager\SheetManager;
 
 /**
  * Class InternalEntityFactory

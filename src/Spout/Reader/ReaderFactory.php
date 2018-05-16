@@ -1,11 +1,11 @@
 <?php
 
-namespace Box\Spout\Reader;
+namespace Box\Spout3\Reader;
 
-use Box\Spout\Common\Creator\HelperFactory;
-use Box\Spout\Common\Exception\UnsupportedTypeException;
-use Box\Spout\Common\Type;
-use Box\Spout\Reader\XLSX\Manager\SharedStringsCaching\CachingStrategyFactory;
+use Box\Spout3\Common\Creator\HelperFactory;
+use Box\Spout3\Common\Exception\UnsupportedTypeException;
+use Box\Spout3\Common\Type;
+use Box\Spout3\Reader\XLSX\Manager\SharedStringsCaching\CachingStrategyFactory;
 
 /**
  * Class ReaderFactory
@@ -18,7 +18,7 @@ class ReaderFactory
      * This creates an instance of the appropriate reader, given the type of the file to be read
      *
      * @param  string $readerType Type of the reader to instantiate
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
+     * @throws \Box\Spout3\Common\Exception\UnsupportedTypeException
      * @return ReaderInterface
      */
     public static function create($readerType)

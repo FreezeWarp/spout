@@ -1,23 +1,23 @@
 <?php
 
-namespace Box\Spout\Writer\XLSX\Manager;
+namespace Box\Spout3\Writer\XLSX\Manager;
 
-use Box\Spout\Common\Entity\Cell;
-use Box\Spout\Common\Entity\Row;
-use Box\Spout\Common\Entity\Style\Style;
-use Box\Spout\Common\Exception\InvalidArgumentException;
-use Box\Spout\Common\Exception\IOException;
-use Box\Spout\Common\Helper\Escaper\XLSX as XLSXEscaper;
-use Box\Spout\Common\Helper\StringHelper;
-use Box\Spout\Common\Manager\OptionsManagerInterface;
-use Box\Spout\Writer\Common\Creator\InternalEntityFactory;
-use Box\Spout\Writer\Common\Entity\Options;
-use Box\Spout\Writer\Common\Entity\Worksheet;
-use Box\Spout\Writer\Common\Helper\CellHelper;
-use Box\Spout\Writer\Common\Manager\RowManager;
-use Box\Spout\Writer\Common\Manager\Style\StyleMerger;
-use Box\Spout\Writer\Common\Manager\WorksheetManagerInterface;
-use Box\Spout\Writer\XLSX\Manager\Style\StyleManager;
+use Box\Spout3\Common\Entity\Cell;
+use Box\Spout3\Common\Entity\Row;
+use Box\Spout3\Common\Entity\Style\Style;
+use Box\Spout3\Common\Exception\InvalidArgumentException;
+use Box\Spout3\Common\Exception\IOException;
+use Box\Spout3\Common\Helper\Escaper\XLSX as XLSXEscaper;
+use Box\Spout3\Common\Helper\StringHelper;
+use Box\Spout3\Common\Manager\OptionsManagerInterface;
+use Box\Spout3\Writer\Common\Creator\InternalEntityFactory;
+use Box\Spout3\Writer\Common\Entity\Options;
+use Box\Spout3\Writer\Common\Entity\Worksheet;
+use Box\Spout3\Writer\Common\Helper\CellHelper;
+use Box\Spout3\Writer\Common\Manager\RowManager;
+use Box\Spout3\Writer\Common\Manager\Style\StyleMerger;
+use Box\Spout3\Writer\Common\Manager\WorksheetManagerInterface;
+use Box\Spout3\Writer\XLSX\Manager\Style\StyleManager;
 
 /**
  * Class WorksheetManager

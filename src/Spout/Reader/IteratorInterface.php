@@ -1,6 +1,6 @@
 <?php
 
-namespace Box\Spout\Reader;
+namespace Box\Spout3\Reader;
 
 /**
  * Interface IteratorInterface

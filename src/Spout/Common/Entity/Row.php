@@ -1,8 +1,8 @@
 <?php
 
-namespace Box\Spout\Common\Entity;
+namespace Box\Spout3\Common\Entity;
 
-use Box\Spout\Common\Entity\Style\Style;
+use Box\Spout3\Common\Entity\Style\Style;
 
 class Row
 {

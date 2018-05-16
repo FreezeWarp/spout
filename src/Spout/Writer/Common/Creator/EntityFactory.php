@@ -1,11 +1,11 @@
 <?php
 
-namespace Box\Spout\Writer\Common\Creator;
+namespace Box\Spout3\Writer\Common\Creator;
 
-use Box\Spout\Common\Entity\Cell;
-use Box\Spout\Common\Entity\Row;
-use Box\Spout\Common\Entity\Style\Style;
-use Box\Spout\Writer\WriterInterface;
+use Box\Spout3\Common\Entity\Cell;
+use Box\Spout3\Common\Entity\Row;
+use Box\Spout3\Common\Entity\Style\Style;
+use Box\Spout3\Writer\WriterInterface;
 
 /**
  * Class EntityFactory
@@ -17,7 +17,7 @@ class EntityFactory
      * This creates an instance of the appropriate writer, given the type of the file to be written
      *
      * @param  string $writerType Type of the writer to instantiate
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
+     * @throws \Box\Spout3\Common\Exception\UnsupportedTypeException
      * @return WriterInterface
      */
     public static function createWriter($writerType)

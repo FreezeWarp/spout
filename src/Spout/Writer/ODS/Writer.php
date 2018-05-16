@@ -1,9 +1,9 @@
 <?php
 
-namespace Box\Spout\Writer\ODS;
+namespace Box\Spout3\Writer\ODS;
 
-use Box\Spout\Writer\Common\Entity\Options;
-use Box\Spout\Writer\WriterMultiSheetsAbstract;
+use Box\Spout3\Writer\Common\Entity\Options;
+use Box\Spout3\Writer\WriterMultiSheetsAbstract;
 
 /**
  * Class Writer
@@ -19,7 +19,7 @@ class Writer extends WriterMultiSheetsAbstract
      * This must be set before opening the writer.
      *
      * @param string $tempFolder Temporary folder where the files to create the ODS will be stored
-     * @throws \Box\Spout\Writer\Exception\WriterAlreadyOpenedException If the writer was already opened
+     * @throws \Box\Spout3\Writer\Exception\WriterAlreadyOpenedException If the writer was already opened
      * @return Writer
      */
     public function setTempFolder($tempFolder)

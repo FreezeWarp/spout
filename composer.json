@@ -1,5 +1,5 @@
 {
-    "name": "box/spout",
+    "name": "box/spout3",
     "description": "PHP Library to read and write spreadsheet files (CSV, XLSX and ODS), in a fast and scalable way",
     "type": "library",
     "keywords": ["php","read","write","csv","xlsx","ods","odf","open","office","excel","spreadsheet","scale","memory","stream","ooxml"],
@@ -26,13 +26,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Box\\Spout\\": "src/Spout"
-        }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "2.8.x-dev"
+            "Box\\Spout3\\": "src/Spout"
         }
     }
-
 }

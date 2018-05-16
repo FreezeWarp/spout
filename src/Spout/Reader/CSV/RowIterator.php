@@ -1,14 +1,14 @@
 <?php
 
-namespace Box\Spout\Reader\CSV;
+namespace Box\Spout3\Reader\CSV;
 
-use Box\Spout\Common\Entity\Row;
-use Box\Spout\Common\Helper\EncodingHelper;
-use Box\Spout\Common\Helper\GlobalFunctionsHelper;
-use Box\Spout\Common\Manager\OptionsManagerInterface;
-use Box\Spout\Reader\Common\Entity\Options;
-use Box\Spout\Reader\CSV\Creator\InternalEntityFactory;
-use Box\Spout\Reader\IteratorInterface;
+use Box\Spout3\Common\Entity\Row;
+use Box\Spout3\Common\Helper\EncodingHelper;
+use Box\Spout3\Common\Helper\GlobalFunctionsHelper;
+use Box\Spout3\Common\Manager\OptionsManagerInterface;
+use Box\Spout3\Reader\Common\Entity\Options;
+use Box\Spout3\Reader\CSV\Creator\InternalEntityFactory;
+use Box\Spout3\Reader\IteratorInterface;
 
 /**
  * Class RowIterator
@@ -45,13 +45,13 @@ class RowIterator implements IteratorInterface
     /** @var bool Whether empty rows should be returned or skipped */
     protected $shouldPreserveEmptyRows;
 
-    /** @var \Box\Spout\Common\Helper\EncodingHelper Helper to work with different encodings */
+    /** @var \Box\Spout3\Common\Helper\EncodingHelper Helper to work with different encodings */
     protected $encodingHelper;
 
-    /** @var \Box\Spout\Reader\CSV\Creator\InternalEntityFactory Factory to create entities */
+    /** @var \Box\Spout3\Reader\CSV\Creator\InternalEntityFactory Factory to create entities */
     protected $entityFactory;
 
-    /** @var \Box\Spout\Common\Helper\GlobalFunctionsHelper Helper to work with global functions */
+    /** @var \Box\Spout3\Common\Helper\GlobalFunctionsHelper Helper to work with global functions */
     protected $globalFunctionsHelper;
 
     /**
@@ -123,7 +123,7 @@ class RowIterator implements IteratorInterface
      * Move forward to next element. Reads data for the next unprocessed row.
      * @see http://php.net/manual/en/iterator.next.php
      *
-     * @throws \Box\Spout\Common\Exception\EncodingConversionException If unable to convert data to UTF-8
+     * @throws \Box\Spout3\Common\Exception\EncodingConversionException If unable to convert data to UTF-8
      * @return void
      */
     public function next()
@@ -136,7 +136,7 @@ class RowIterator implements IteratorInterface
     }
 
     /**
-     * @throws \Box\Spout\Common\Exception\EncodingConversionException If unable to convert data to UTF-8
+     * @throws \Box\Spout3\Common\Exception\EncodingConversionException If unable to convert data to UTF-8
      * @return void
      */
     protected function readDataForNextRow()
@@ -178,7 +178,7 @@ class RowIterator implements IteratorInterface
      * As fgetcsv() does not manage correctly encoding for non UTF-8 data,
      * we remove manually whitespace with ltrim or rtrim (depending on the order of the bytes)
      *
-     * @throws \Box\Spout\Common\Exception\EncodingConversionException If unable to convert data to UTF-8
+     * @throws \Box\Spout3\Common\Exception\EncodingConversionException If unable to convert data to UTF-8
      * @return array|false The row for the current file pointer, encoded in UTF-8 or FALSE if nothing to read
      */
     protected function getNextUTF8EncodedRow()

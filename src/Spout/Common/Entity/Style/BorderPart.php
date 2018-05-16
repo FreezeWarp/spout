@@ -1,10 +1,10 @@
 <?php
 
-namespace Box\Spout\Common\Entity\Style;
+namespace Box\Spout3\Common\Entity\Style;
 
-use Box\Spout\Writer\Exception\Border\InvalidNameException;
-use Box\Spout\Writer\Exception\Border\InvalidStyleException;
-use Box\Spout\Writer\Exception\Border\InvalidWidthException;
+use Box\Spout3\Writer\Exception\Border\InvalidNameException;
+use Box\Spout3\Writer\Exception\Border\InvalidStyleException;
+use Box\Spout3\Writer\Exception\Border\InvalidWidthException;
 
 /**
  * Class BorderPart

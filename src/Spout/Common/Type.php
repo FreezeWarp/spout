@@ -1,6 +1,6 @@
 <?php
 
-namespace Box\Spout\Common;
+namespace Box\Spout3\Common;
 
 /**
  * Class Type
