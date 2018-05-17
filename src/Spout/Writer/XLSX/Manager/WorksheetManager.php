@@ -121,14 +121,14 @@ EOD;
 
         fwrite($sheetFilePointer, self::SHEET_XML_FILE_HEADER);
 
-        if (!empty($options['freeze_pane']) || true) {
+        if (!empty($options['freeze_pane'])) {
+            $xpos = $options['freeze_pane'][0] ?? 0;
+            $ypos = $options['freeze_pane'][1] ?? 0;
+
             fwrite($sheetFilePointer, '
                 <sheetViews>
                     <sheetView tabSelected="1" workbookViewId="0">
-                        <pane xSplit="1" ySplit="1" topLeftCell="B2" activePane="bottomRight" state="frozen" />
-                        <selection pane="topRight" activeCell="B1" sqref="B1"/>
-                        <selection pane="bottomLeft" activeCell="A2" sqref="A2"/>
-                        <selection pane="bottomRight" activeCell="K9" sqref="K9"/>
+                        <pane xSplit="' . $xpos . '" ySplit="' . $ypos . '" topLeftCell="' . self::getCellOffset($xpos + 1, $ypos + 1) . '" activePane="bottomRight" state="frozen" />
                     </sheetView>
                 </sheetViews>
             ');
@@ -321,5 +321,12 @@ EOD;
 
         fwrite($worksheetFilePointer, '</worksheet>');
         fclose($worksheetFilePointer);
+    }
+
+
+    public static function getCellOffset($x, $y)
+    {
+        return chr(64 + $x)
+            . ($y + 1);
     }
 }
