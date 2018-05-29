@@ -41,13 +41,12 @@ EOD;
     {
         $sharedStringsFilePath = $xlFolder . '/' . self::SHARED_STRINGS_FILE_NAME;
         $this->sharedStringsFilePointer = fopen($sharedStringsFilePath, 'w');
-        stream_set_chunk_size($this->sharedStringsFilePointer, \Box\Spout3\Common\Helper\GlobalFunctionsHelper::$buffer);
 
         $this->throwIfSharedStringsFilePointerIsNotAvailable();
 
         // the headers is split into different parts so that we can fseek and put in the correct count and uniqueCount later
         $header = self::SHARED_STRINGS_XML_FILE_FIRST_PART_HEADER . ' ' . self::DEFAULT_STRINGS_COUNT_PART . '>';
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->sharedStringsFilePointer, $header);
+        fwrite($this->sharedStringsFilePointer, $header);
 
         $this->stringsEscaper = $stringsEscaper;
     }
@@ -74,7 +73,7 @@ EOD;
      */
     public function writeString($string)
     {
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->sharedStringsFilePointer, '<si><t xml:space="preserve">' . $this->stringsEscaper->escape($string) . '</t></si>');
+        fwrite($this->sharedStringsFilePointer, '<si><t xml:space="preserve">' . $this->stringsEscaper->escape($string) . '</t></si>');
         $this->numSharedStrings++;
 
         // Shared string ID is zero-based
@@ -92,7 +91,7 @@ EOD;
             return;
         }
 
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->sharedStringsFilePointer, '</sst>');
+        fwrite($this->sharedStringsFilePointer, '</sst>');
 
         // Replace the default strings count with the actual number of shared strings in the file header
         $firstPartHeaderLength = strlen(self::SHARED_STRINGS_XML_FILE_FIRST_PART_HEADER);
@@ -100,8 +99,8 @@ EOD;
 
         // Adding 1 to take into account the space between the last xml attribute and "count"
         fseek($this->sharedStringsFilePointer, $firstPartHeaderLength + 1);
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->sharedStringsFilePointer, sprintf("%-{$defaultStringsCountPartLength}s", 'count="' . $this->numSharedStrings . '" uniqueCount="' . $this->numSharedStrings . '"'));
+        fwrite($this->sharedStringsFilePointer, sprintf("%-{$defaultStringsCountPartLength}s", 'count="' . $this->numSharedStrings . '" uniqueCount="' . $this->numSharedStrings . '"'));
 
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose_buffered($this->sharedStringsFilePointer);
+        fclose($this->sharedStringsFilePointer);
     }
 }
