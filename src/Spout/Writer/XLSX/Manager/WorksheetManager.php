@@ -111,8 +111,7 @@ EOD;
      */
     public function startSheet(Worksheet $worksheet, $options = [])
     {
-        $sheetFilePointer = fopen($worksheet->getFilePath(), 'w');
-        stream_set_chunk_size($sheetFilePointer, \Box\Spout3\Common\Helper\GlobalFunctionsHelper::$buffer);
+        $sheetFilePointer = \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen_buffered($worksheet->getFilePath(), 'w');
 
         $this->throwIfSheetFilePointerIsNotAvailable($sheetFilePointer);
 
