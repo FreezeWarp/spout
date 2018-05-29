@@ -112,6 +112,8 @@ EOD;
     public function startSheet(Worksheet $worksheet, $options = [])
     {
         $sheetFilePointer = fopen($worksheet->getFilePath(), 'w');
+        stream_set_chunk_size($sheetFilePointer, \Box\Spout3\Common\Helper\GlobalFunctionsHelper::$buffer);
+
         $this->throwIfSheetFilePointerIsNotAvailable($sheetFilePointer);
 
         $worksheet->setFilePointer($sheetFilePointer);
@@ -119,13 +121,13 @@ EOD;
             $worksheet->setOption($option, $value);
         }
 
-        fwrite($sheetFilePointer, self::SHEET_XML_FILE_HEADER);
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, self::SHEET_XML_FILE_HEADER);
 
         if (!empty($options['freeze_pane'])) {
             $xpos = $options['freeze_pane'][0] ?? 0;
             $ypos = $options['freeze_pane'][1] ?? 0;
 
-            fwrite($sheetFilePointer, '
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '
                 <sheetViews>
                     <sheetView tabSelected="1" workbookViewId="0">
                         <pane xSplit="' . $xpos . '" ySplit="' . $ypos . '" topLeftCell="' . self::getCellOffset($xpos + 1, $ypos + 1) . '" activePane="bottomRight" state="frozen" />
@@ -135,18 +137,18 @@ EOD;
         }
 
         if (!empty($options['column_widths'])) {
-            fwrite($sheetFilePointer, '<cols>');
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '<cols>');
 
             foreach ($options['column_widths'] AS $i => $width) {
                 if ($width) {
-                    fwrite($sheetFilePointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" width="' . $width . '" customWidth="1" />');
+                    \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" width="' . $width . '" customWidth="1" />');
                 }
             }
 
-            fwrite($sheetFilePointer, '</cols>');
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '</cols>');
         }
 
-        fwrite($sheetFilePointer, '<sheetData>');
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '<sheetData>');
     }
 
     /**
@@ -201,7 +203,7 @@ EOD;
 
         $rowXML .= '</row>';
 
-        $wasWriteSuccessful = fwrite($worksheet->getFilePointer(), $rowXML);
+        $wasWriteSuccessful = \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheet->getFilePointer(), $rowXML);
         if ($wasWriteSuccessful === false) {
             throw new IOException("Unable to write data in {$worksheet->getFilePath()}");
         }
@@ -301,12 +303,12 @@ EOD;
             return;
         }
 
-        fwrite($worksheetFilePointer, '</sheetData>');
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheetFilePointer, '</sheetData>');
 
         if ($worksheet->getOption('filter') && $worksheet->getMaxNumColumns()) {
-            fwrite($worksheetFilePointer, '<autoFilter ref="A1:AZ1"/>');
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheetFilePointer, '<autoFilter ref="A1:AZ1"/>');
 
-//            fwrite($worksheetFilePointer, '<autoFilter ref="A1:' . chr(64 + $worksheet->getMaxNumColumns()) . '1"/>');
+//            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheetFilePointer, '<autoFilter ref="A1:' . chr(64 + $worksheet->getMaxNumColumns()) . '1"/>');
 /*            $ref = [];
 
             // TODO: only goes to 26
@@ -316,11 +318,11 @@ EOD;
             }
 
             $ref = implode(';', $ref);
-            fwrite($worksheetFilePointer, "<autoFilter ref=\"$ref\"/>");*/
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheetFilePointer, "<autoFilter ref=\"$ref\"/>");*/
         }
 
-        fwrite($worksheetFilePointer, '</worksheet>');
-        fclose($worksheetFilePointer);
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheetFilePointer, '</worksheet>');
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose_buffered($worksheetFilePointer);
     }
 
 

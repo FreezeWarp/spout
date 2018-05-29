@@ -85,7 +85,7 @@ class FileBasedStrategy implements CachingStrategyInterface
         // Encoding the line feed character allows to preserve this assumption
         $lineFeedEncodedSharedString = $this->escapeLineFeed($sharedString);
 
-        $this->globalFunctionsHelper->fwrite($this->tempFilePointer, $lineFeedEncodedSharedString . PHP_EOL);
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->tempFilePointer, $lineFeedEncodedSharedString . PHP_EOL);
     }
 
     /**
@@ -111,7 +111,7 @@ class FileBasedStrategy implements CachingStrategyInterface
     {
         // close pointer to the last temp file that was written
         if ($this->tempFilePointer) {
-            $this->globalFunctionsHelper->fclose($this->tempFilePointer);
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose_buffered($this->tempFilePointer);
         }
     }
 

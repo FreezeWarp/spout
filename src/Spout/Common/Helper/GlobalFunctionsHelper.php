@@ -10,6 +10,9 @@ namespace Box\Spout3\Common\Helper;
  */
 class GlobalFunctionsHelper
 {
+    static $buffers = [];
+    static $buffer = 1024 * 1024;
+
     /**
      * Wrapper around global function fopen()
      * @see fopen()
@@ -126,7 +129,36 @@ class GlobalFunctionsHelper
      */
     public function fwrite($handle, $string)
     {
+
         return fwrite($handle, $string);
+
+    }
+
+    public static function fwrite_buffered($handle, $string)
+    {
+
+        if (strlen($string) > self::$buffer) {
+            return fwrite($handle, $string);
+        }
+
+        else if (!isset(self::$buffers[intval($handle)])) {
+            self::$buffers[intval($handle)] = $string;
+        }
+
+        else {
+            self::$buffers[intval($handle)] .= $string;
+
+            if (strlen(self::$buffers[intval($handle)]) > self::$buffer) {
+                $res = fwrite($handle, self::$buffers[intval($handle)]);
+
+                unset(self::$buffers[intval($handle)]);
+
+                return $res;
+            }
+        }
+
+        return 0;
+
     }
 
     /**
@@ -139,6 +171,17 @@ class GlobalFunctionsHelper
     public function fclose($handle)
     {
         return fclose($handle);
+    }
+
+    public static function fclose_buffered($handle)
+    {
+
+        if (isset(self::$buffers[intval($handle)])) {
+            fwrite($handle, self::$buffers[intval($handle)]);
+        }
+
+        return fclose($handle);
+
     }
 
     /**
