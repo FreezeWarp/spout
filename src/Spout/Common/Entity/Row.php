@@ -23,7 +23,7 @@ class Row
      * @param Cell[] $cells
      * @param Style|null $style
      */
-    public function __construct(array $cells, $style)
+    public function __construct(array $cells, $style = null)
     {
         $this
             ->setCells($cells)
@@ -95,7 +95,7 @@ class Row
     /**
      * @return Style
      */
-    public function getStyle()
+    public function getStyle(): ?Style
     {
         return $this->style;
     }
@@ -104,9 +104,9 @@ class Row
      * @param Style|null $style
      * @return Row
      */
-    public function setStyle($style)
+    public function setStyle(?Style $style = null)
     {
-        $this->style = $style ?: new Style();
+        $this->style = $style;
 
         return $this;
     }

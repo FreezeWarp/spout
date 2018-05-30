@@ -19,10 +19,18 @@ class StyleRegistry
     /**
      * @param Style $defaultStyle
      */
-    public function __construct(Style $defaultStyle)
+    public function __construct(?Style $defaultStyle)
     {
-        // This ensures that the default style is the first one to be registered
-        $this->registerStyle($defaultStyle);
+        if ($defaultStyle) {
+            $this->registerStyle($defaultStyle);
+        }
+        else {
+            // This ensures that the default style is the first one to be registered
+            $this->registerStyle(
+                (new \Box\Spout3\Writer\Common\Creator\Style\StyleBuilder())
+                    ->build()
+            );
+        }
     }
 
     /**

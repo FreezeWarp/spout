@@ -125,17 +125,21 @@ EOD;
 
         \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, self::SHEET_XML_FILE_HEADER);
 
-        /*if (!empty($options['freeze_pane'])) {
+        if (!empty($options['freeze_pane'])) {
             $xpos = $options['freeze_pane'][0] ?? 0;
             $ypos = $options['freeze_pane'][1] ?? 0;
 
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '
+            // Disables copy/paste, I don't know why
+            /*\Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '
                 <sheetViews>
                     <sheetView tabSelected="1" workbookViewId="0">
                         <pane xSplit="' . $xpos . '" ySplit="' . $ypos . '" topLeftCell="' . self::getCellOffset($xpos + 1, $ypos + 1) . '" activePane="bottomRight" state="frozen" />
+                        <selection pane="topRight" activeCell="' . self::getCellOffset($xpos + 1, 1) . '" sqref="' . self::getCellOffset($xpos + 1, 1) . '"  />
+                        <selection pane="bottomLeft" activeCell="' . self::getCellOffset(1, $ypos + 1) . '" sqref="' . self::getCellOffset(1, $ypos + 1) . '"  />
+                        <selection pane="bottomRight" activeCell="K17" sqref="K17"  />
                     </sheetView>
                 </sheetViews>
-            ');
+            ');*/
         }
 
         if (!empty($options['column_widths'])) {
@@ -148,7 +152,7 @@ EOD;
             }
 
             \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '</cols>');
-        }*/
+        }
 
         \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '<sheetData>');
     }
@@ -222,22 +226,28 @@ EOD;
      * @throws InvalidArgumentException If the given value cannot be processed
      * @return string
      */
-    private function applyStyleAndGetCellXML(Cell $cell, Style $rowStyle, $rowIndex, $cellIndex)
+    private function applyStyleAndGetCellXML(Cell $cell, ?Style $rowStyle, $rowIndex, $cellIndex)
     {
 
         // Apply row and extra styles
         // Perform a full (but slower) merge of cell and row styles if enabled.
-        if ($cell->getStyle()) {
+        if ($cell->getStyle() && $rowStyle) {
             $mergedCellAndRowStyle = $this->styleMerger->merge($cell->getStyle(), $rowStyle);
             $cell->setStyle($mergedCellAndRowStyle);
             $newCellStyle = $this->styleManager->applyExtraStylesIfNeeded($cell);
-            $registeredStyle = $this->styleManager->registerStyle($newCellStyle);
+            $registeredStyle = $this->styleManager->registerStyle($newCellStyle)->getId();
+        }
+        elseif ($rowStyle) {
+            $registeredStyle = $this->styleManager->registerStyle($rowStyle)->getId();
+        }
+        elseif ($cell->getStyle()) {
+            $registeredStyle = $this->styleManager->registerStyle($cell->getStyle())->getId();
         }
         else {
-            $registeredStyle = $this->styleManager->registerStyle($rowStyle);
+            $registeredStyle = null;
         }
 
-        return $this->getCellXML($rowIndex, $cellIndex, $cell, $registeredStyle->getId());
+        return $this->getCellXML($rowIndex, $cellIndex, $cell, $registeredStyle);
     }
 
     /**
@@ -254,7 +264,10 @@ EOD;
     {
         $columnIndex = CellHelper::getCellIndexFromColumnIndex($cellNumber);
         $cellXML = '<c r="' . $columnIndex . $rowIndex . '"';
-        $cellXML .= ' s="' . $styleId . '"';
+
+        if ($styleId) {
+            $cellXML .= ' s="' . $styleId . '"';
+        }
 
         if ($cell->isString()) {
             $cellXML .= $this->getCellXMLFragmentForNonEmptyString($cell->getValue());
@@ -263,7 +276,7 @@ EOD;
         } elseif ($cell->isNumeric()) {
             $cellXML .= '><v>' . $cell->getValue() . '</v></c>';
         } elseif ($cell->isEmpty()) {
-            if ($this->styleManager->shouldApplyStyleOnEmptyCell($styleId)) {
+            if ($styleId && $this->styleManager->shouldApplyStyleOnEmptyCell($styleId)) {
                 $cellXML .= '/>';
             } else {
                 // don't write empty cells that do no need styling
@@ -314,7 +327,7 @@ EOD;
         \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheetFilePointer, '</sheetData>');
 
         if ($worksheet->getOption('filter') && $worksheet->getMaxNumColumns()) {
-            //\Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheetFilePointer, '<autoFilter ref="A1:AZ1"/>');
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheetFilePointer, '<autoFilter ref="A1:AZ1"/>');
 
 //            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheetFilePointer, '<autoFilter ref="A1:' . chr(64 + $worksheet->getMaxNumColumns()) . '1"/>');
 /*            $ref = [];

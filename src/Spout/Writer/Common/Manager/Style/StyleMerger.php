@@ -22,11 +22,12 @@ class StyleMerger
      * @param Style $baseStyle
      * @return Style New style corresponding to the merge of the 2 styles
      */
-    public function merge(Style $style, Style $baseStyle)
+    public function merge($style, $baseStyle)
     {
         if ($style === null) {
-            $style = new Style();
+            return $baseStyle;
         }
+
         $mergedStyle = clone $style;
 
         $this->mergeFontStyles($mergedStyle, $style, $baseStyle);
