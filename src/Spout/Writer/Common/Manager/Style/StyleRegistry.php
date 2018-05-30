@@ -34,9 +34,9 @@ class StyleRegistry
      */
     public function registerStyle(Style $style)
     {
-        $serializedStyle = $this->serialize($style);
+        $serializedStyle = spl_object_hash($style);
 
-        if (!$this->hasStyleAlreadyBeenRegistered($style)) {
+        if (!isset($this->serializedStyleToStyleIdMappingTable[$serializedStyle])) {
             $nextStyleId = count($this->serializedStyleToStyleIdMappingTable);
             $style->setId($nextStyleId);
 
@@ -45,20 +45,6 @@ class StyleRegistry
         }
 
         return $this->getStyleFromSerializedStyle($serializedStyle);
-    }
-
-    /**
-     * Returns whether the given style has already been registered.
-     *
-     * @param Style $style
-     * @return bool
-     */
-    protected function hasStyleAlreadyBeenRegistered(Style $style)
-    {
-        $serializedStyle = $this->serialize($style);
-
-        // Using isset here because it is way faster than array_key_exists...
-        return isset($this->serializedStyleToStyleIdMappingTable[$serializedStyle]);
     }
 
     /**
@@ -89,26 +75,5 @@ class StyleRegistry
     public function getStyleFromStyleId($styleId)
     {
         return $this->styleIdToStyleMappingTable[$styleId];
-    }
-
-    /**
-     * Serializes the style for future comparison with other styles.
-     * The ID is excluded from the comparison, as we only care about
-     * actual style properties.
-     *
-     * @param Style $style
-     * @return string The serialized style
-     */
-    public function serialize(Style $style)
-    {
-        // In order to be able to properly compare style, set static ID value
-        $currentId = $style->getId();
-        $style->setId(0);
-
-        $serializedStyle = serialize($style);
-
-        $style->setId($currentId);
-
-        return $serializedStyle;
     }
 }

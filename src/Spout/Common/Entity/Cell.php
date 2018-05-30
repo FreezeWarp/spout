@@ -96,7 +96,7 @@ class Cell
      */
     public function setStyle($style)
     {
-        $this->style = $style ?: new Style();
+        $this->style = $style;
     }
 
     /**

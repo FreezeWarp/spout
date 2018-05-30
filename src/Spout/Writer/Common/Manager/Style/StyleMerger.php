@@ -24,6 +24,9 @@ class StyleMerger
      */
     public function merge(Style $style, Style $baseStyle)
     {
+        if ($style === null) {
+            $style = new Style();
+        }
         $mergedStyle = clone $style;
 
         $this->mergeFontStyles($mergedStyle, $style, $baseStyle);
