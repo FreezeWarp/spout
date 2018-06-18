@@ -129,17 +129,21 @@ EOD;
             $xpos = $options['freeze_pane'][0] ?? 0;
             $ypos = $options['freeze_pane'][1] ?? 0;
 
+            $topRight = self::getCellOffset($xpos + 1, $ypos + 1);
+            $bottomLeft = self::getCellOffset(1, $ypos + 1);
+            $bottomRight = self::getCellOffset($xpos + 1, $ypos + 1);
+
             // Disables copy/paste, I don't know why
-            /*\Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '
                 <sheetViews>
                     <sheetView tabSelected="1" workbookViewId="0">
-                        <pane xSplit="' . $xpos . '" ySplit="' . $ypos . '" topLeftCell="' . self::getCellOffset($xpos + 1, $ypos + 1) . '" activePane="bottomRight" state="frozen" />
-                        <selection pane="topRight" activeCell="' . self::getCellOffset($xpos + 1, 1) . '" sqref="' . self::getCellOffset($xpos + 1, 1) . '"  />
-                        <selection pane="bottomLeft" activeCell="' . self::getCellOffset(1, $ypos + 1) . '" sqref="' . self::getCellOffset(1, $ypos + 1) . '"  />
-                        <selection pane="bottomRight" activeCell="K17" sqref="K17"  />
+                        <pane xSplit="' . $xpos . '" ySplit="' . $ypos . '" topLeftCell="' . $bottomRight . '" activePane="bottomRight" state="frozen" />
+                        <selection pane="topRight" activeCell="' . $topRight . '" sqref="' . $topRight . '"  />
+                        <selection pane="bottomLeft" activeCell="' . $bottomLeft . '" sqref="' . $bottomLeft . '"  />
+                        <selection pane="bottomRight" activeCell="' . $bottomRight . '" sqref="' . $bottomRight . '" />
                     </sheetView>
                 </sheetViews>
-            ');*/
+            ');
         }
 
         if (!empty($options['column_widths'])) {
