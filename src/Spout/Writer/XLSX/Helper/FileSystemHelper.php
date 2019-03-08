@@ -14,7 +14,7 @@ use Box\Spout3\Writer\XLSX\Manager\Style\StyleManager;
  */
 class FileSystemHelper extends \Box\Spout3\Common\Helper\FileSystemHelper implements FileSystemWithRootFolderHelperInterface
 {
-    const APP_NAME = 'Spout';
+    const APP_NAME = 'HAMR XLSX Writer (Using Spout)';
 
     const RELS_FOLDER_NAME = '_rels';
     const DOC_PROPS_FOLDER_NAME = 'docProps';

@@ -137,6 +137,11 @@ EOD;
     public function startSheet(Worksheet $worksheet, $options = [])
     {
 
+        // the many hacks in this fork make this somewhat necessary
+        if ($this->active_sheet) {
+            $this->close($this->active_sheet);
+        }
+
         $this->active_sheet = $worksheet;
 
 
@@ -231,9 +236,9 @@ EOD;
             $xpos = $this->active_sheet->getOption('freeze_pane')[0] ?? 0;
             $ypos = $this->active_sheet->getOption('freeze_pane')[1] ?? 0;
 
-            $topRight = self::getCellOffset($xpos + 1, $ypos + 1);
-            $bottomLeft = self::getCellOffset(1, $ypos + 1);
-            $bottomRight = self::getCellOffset($xpos + 1, $ypos + 1);
+            $topRight = self::getCellOffset($xpos + 1, $ypos);
+            $bottomLeft = self::getCellOffset(1, $ypos);
+            $bottomRight = self::getCellOffset($xpos + 1, $ypos);
 
             // Disables copy/paste, I don't know why
             \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_sheet_file_pointer, '
@@ -397,8 +402,10 @@ EOD;
 
         // special case: if cell is image, write it
         if ($cell->isImage()) {
-            // Add the image to the queue of images to load
-            $this->queued_images[] = [$rowIndex, $cellNumber, $cell->getValue()];
+            if (!empty($cell->getValue())) {
+                // Add the image to the queue of images to load
+                $this->queued_images[] = [$rowIndex, $cellNumber, $cell->getValue()];
+            }
 
             // We aren't rendering any cell data.
             return '';
@@ -451,26 +458,6 @@ EOD;
         return $cellXMLFragment;
     }
 
-    /**
-     * Inserts an image into the given cell.
-     *
-     * @param int $rowIndex
-     * @param int $cellNumber
-     * @param string $cellValue The image path
-     *
-     * @throws InvalidArgumentException If the string exceeds the maximum number of characters allowed per cell
-     * @return string The XML fragment representing the cell
-     */
-    private function createDrawing($rowIndex, $cellNumber, $cellValue)
-    {
-
-        // Add the image to the queue of images to load
-        $this->queued_images[] = [$rowIndex, $cellNumber, $cellValue];
-
-
-        // We aren't rendering any cell data.
-        return '';
-    }
 
     /**
      * {@inheritdoc}
