@@ -68,6 +68,28 @@ EOD;
     /** @var bool Whether to merge cell styles with row styles, or just use the cell style unaltered if one is provided. */
     protected $mergeCellStyles = false;
 
+    /** @var array All tooltips associated with cells in this worksheet. */
+    public $tooltips = [];
+
+    /** @var array An array of column options */
+    public $options = [];
+
+    /** @var resource A filepointer to the currently opened sheet. */
+    private $active_sheet_file_pointer;
+
+    private $active_sheet_rels_file_pointer;
+
+    /** @var resource A filepointer to the currently opened drawings. */
+    private $active_drawing_file_pointer;
+
+    private $active_drawing_rels_file_pointer;
+
+    private $current_image_offset = 0;
+
+    private $active_sheet;
+
+    private $queued_images = [];
+
     /**
      * WorksheetManager constructor.
      *
@@ -114,27 +136,107 @@ EOD;
      */
     public function startSheet(Worksheet $worksheet, $options = [])
     {
-        $sheetFilePointer = \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen_buffered($worksheet->getFilePath(), 'w');
 
-        $this->throwIfSheetFilePointerIsNotAvailable($sheetFilePointer);
+        $this->active_sheet = $worksheet;
 
-        $worksheet->setFilePointer($sheetFilePointer);
+
+
+        // Open the file pointer for the sheet
+        $this->active_sheet_file_pointer = \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen_buffered($worksheet->getFilePath(), 'w');
+
+        $this->throwIfSheetFilePointerIsNotAvailable($this->active_sheet_file_pointer);
+
+        // Begin writing the sheet
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_sheet_file_pointer, self::SHEET_XML_FILE_HEADER);
+
+
+        // Open the file pointer for the sheet rels
+        $this->active_sheet_rels_file_pointer = \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen_buffered(
+            dirname($worksheet->getFilePath())
+                . '/_rels/'
+                . basename($worksheet->getFilePath())
+                . '.rels'
+            , 'w'
+        );
+
+        $this->throwIfSheetFilePointerIsNotAvailable($this->active_sheet_rels_file_pointer);
+
+
+        // Derive the drawings file name from the sheet name
+        $drawings_name = str_replace('sheet', 'drawing', basename($worksheet->getFilePath()));
+
+
+        // Link the drawings into the sheet rels
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered(
+            $this->active_sheet_rels_file_pointer,
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+                . "\n"
+                . '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/' . $drawings_name . '"/></Relationships>'
+        );
+
+
+        // Open the drawings file
+        $this->active_drawing_file_pointer = \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen_buffered(
+            dirname($worksheet->getFilePath())
+                . '/../drawings/'
+                . $drawings_name,
+            'w'
+        );
+
+        $this->throwIfSheetFilePointerIsNotAvailable($this->active_drawing_file_pointer);
+
+        // Start the drawings file
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered(
+            $this->active_drawing_file_pointer,
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+                . "\n"
+                . '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">'
+        );
+
+
+        // Open the drawings rels file (this links drawing XML objects to physical image files)
+        $this->active_drawing_rels_file_pointer = \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen_buffered(
+            dirname($worksheet->getFilePath())
+                . '/../drawings/_rels/'
+                . $drawings_name
+                . '.rels',
+            'w'
+        );
+
+        $this->throwIfSheetFilePointerIsNotAvailable($this->active_drawing_rels_file_pointer);
+
+
+        // Start the drawings rels file
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered(
+            $this->active_drawing_rels_file_pointer,
+            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+                . "\n"
+                . '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        );
+
+
+        // Let the worksheet know what its file pointer is
+        $worksheet->setFilePointer($this->active_sheet_file_pointer);
+
+
+        // Let the worksheet know what options are applied to it
         foreach ($options AS $option => $value) {
             $worksheet->setOption($option, $value);
         }
 
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, self::SHEET_XML_FILE_HEADER);
 
-        if (!empty($options['freeze_pane'])) {
-            $xpos = $options['freeze_pane'][0] ?? 0;
-            $ypos = $options['freeze_pane'][1] ?? 0;
+
+        // Apply freeze pane, if applicable
+        if (!empty($this->active_sheet->getOption('freeze_pane'))) {
+            $xpos = $this->active_sheet->getOption('freeze_pane')[0] ?? 0;
+            $ypos = $this->active_sheet->getOption('freeze_pane')[1] ?? 0;
 
             $topRight = self::getCellOffset($xpos + 1, $ypos + 1);
             $bottomLeft = self::getCellOffset(1, $ypos + 1);
             $bottomRight = self::getCellOffset($xpos + 1, $ypos + 1);
 
             // Disables copy/paste, I don't know why
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_sheet_file_pointer, '
                 <sheetViews>
                     <sheetView tabSelected="1" workbookViewId="0">
                         <pane xSplit="' . $xpos . '" ySplit="' . $ypos . '" topLeftCell="' . $bottomRight . '" activePane="bottomRight" state="frozen" />
@@ -146,19 +248,25 @@ EOD;
             ');
         }
 
-        if (!empty($options['column_widths'])) {
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '<cols>');
 
-            foreach ($options['column_widths'] AS $i => $width) {
+
+        // Apply column widths, if applicable
+        if (!empty($this->active_sheet->getOption('column_widths'))) {
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_sheet_file_pointer, '<cols>');
+
+            foreach ($this->active_sheet->getOption('column_widths') AS $i => $width) {
                 if ($width) {
-                    \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" width="' . $width . '" customWidth="1" />');
+                    \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_sheet_file_pointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" width="' . $width . '" customWidth="1" />');
                 }
             }
 
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '</cols>');
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_sheet_file_pointer, '</cols>');
         }
 
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($sheetFilePointer, '<sheetData>');
+
+
+        // Begin the <sheetData> XML block
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_sheet_file_pointer, '<sheetData>');
     }
 
     /**
@@ -204,10 +312,25 @@ EOD;
         $numCells = $row->getNumCells();
         $this->maxColumns = max($this->maxColumns, $numCells);
 
-        $rowXML = '<row r="' . $rowIndex . '" spans="1:' . $numCells . '">';
+        $rowXML = '<row r="' . $rowIndex . '" spans="1:' . $numCells . '"';
+
+        // if the row contains an image, set the height to 100
+        foreach ($row->getCells() AS $cell) {
+            if ($cell->isImage()) {
+                $rowXML .= ' ht="100" customHeight="1"';
+                break;
+            }
+        }
+
+        $rowXML .= '>';
 
         foreach ($row->getCells() as $cell) {
             $rowXML .= $this->applyStyleAndGetCellXML($cell, $rowStyle, $rowIndex, $cellIndex);
+
+            if ($cell->getTooltip()) {
+                $this->tooltips[self::getCellOffset($rowIndex, $cellIndex)] = $cell->getTooltip();
+            }
+
             $cellIndex++;
         }
 
@@ -235,7 +358,7 @@ EOD;
 
         // Apply row and extra styles
         // Perform a full (but slower) merge of cell and row styles if enabled.
-        if ($cell->getStyle() && $rowStyle) {
+        if ($rowStyle && $cell->getStyle()) {
             $mergedCellAndRowStyle = $this->styleMerger->merge($cell->getStyle(), $rowStyle);
             $cell->setStyle($mergedCellAndRowStyle);
             $newCellStyle = $this->styleManager->applyExtraStylesIfNeeded($cell);
@@ -266,6 +389,22 @@ EOD;
      */
     private function getCellXML($rowIndex, $cellNumber, Cell $cell, $styleId)
     {
+
+        // special case: don't do anything if cell is empty and unstyled
+        if ($cell->isEmpty() && (!$styleId || !$this->styleManager->shouldApplyStyleOnEmptyCell($styleId))) {
+            return '';
+        }
+
+        // special case: if cell is image, write it
+        if ($cell->isImage()) {
+            // Add the image to the queue of images to load
+            $this->queued_images[] = [$rowIndex, $cellNumber, $cell->getValue()];
+
+            // We aren't rendering any cell data.
+            return '';
+        }
+
+
         $columnIndex = CellHelper::getCellIndexFromColumnIndex($cellNumber);
         $cellXML = '<c r="' . $columnIndex . $rowIndex . '"';
 
@@ -280,18 +419,13 @@ EOD;
         } elseif ($cell->isNumeric()) {
             $cellXML .= '><v>' . $cell->getValue() . '</v></c>';
         } elseif ($cell->isEmpty()) {
-            if ($styleId && $this->styleManager->shouldApplyStyleOnEmptyCell($styleId)) {
-                $cellXML .= '/>';
-            } else {
-                // don't write empty cells that do no need styling
-                // NOTE: not appending to $cellXML is the right behavior!!
-                $cellXML = '';
-            }
+            $cellXML .= '/>';
         } else {
-            throw new InvalidArgumentException('Trying to add a value with an unsupported type: ' . gettype($cell->getValue()));
+            throw new InvalidArgumentException('Trying to add a value with an unsupported type: ' . \gettype($cell->getValue()));
         }
 
         return $cellXML;
+
     }
 
     /**
@@ -318,36 +452,165 @@ EOD;
     }
 
     /**
+     * Inserts an image into the given cell.
+     *
+     * @param int $rowIndex
+     * @param int $cellNumber
+     * @param string $cellValue The image path
+     *
+     * @throws InvalidArgumentException If the string exceeds the maximum number of characters allowed per cell
+     * @return string The XML fragment representing the cell
+     */
+    private function createDrawing($rowIndex, $cellNumber, $cellValue)
+    {
+
+        // Add the image to the queue of images to load
+        $this->queued_images[] = [$rowIndex, $cellNumber, $cellValue];
+
+
+        // We aren't rendering any cell data.
+        return '';
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function close(Worksheet $worksheet)
     {
-        $worksheetFilePointer = $worksheet->getFilePointer();
 
-        if (!is_resource($worksheetFilePointer)) {
+        if (!is_resource($this->active_sheet_file_pointer)) {
             return;
         }
 
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheetFilePointer, '</sheetData>');
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_sheet_file_pointer, '</sheetData>');
 
         if ($worksheet->getOption('filter') && $worksheet->getMaxNumColumns()) {
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheetFilePointer, '<autoFilter ref="A1:AZ1"/>');
 
-//            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheetFilePointer, '<autoFilter ref="A1:' . chr(64 + $worksheet->getMaxNumColumns()) . '1"/>');
-/*            $ref = [];
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_sheet_file_pointer, '<autoFilter ref="A1:ZZ1"/>');
 
-            // TODO: only goes to 26
-            $cols = $worksheet->getOption('filter');
-            foreach ($cols AS $columnNum) {
-                $ref[] = chr(65 + $columnNum) . '1:' . chr(65 + $columnNum) . '1';
+            if ($this->tooltips) {
+                \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered(
+                    $this->active_sheet_file_pointer,
+                    '<dataValidations count="' . \count($this->tooltips) . '">'
+                        . array_map(function($tooltip, $cell_ref) {
+                            return '<dataValidation allowBlank="1" showInputMessage="1" showErrorMessage="1" prompt="' . $tooltip . '" sqref="' . $cell_ref . '" />';
+                        }, $this->tooltips, array_keys($this->tooltips))
+                        . '</dataValidations>'
+                );
             }
-
-            $ref = implode(';', $ref);
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheetFilePointer, "<autoFilter ref=\"$ref\"/>");*/
         }
 
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheetFilePointer, '</worksheet>');
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose_buffered($worksheetFilePointer);
+
+        // Resolve every image that is being inserted
+        $client = new \GuzzleHttp\Client();
+
+        $pool = new \GuzzleHttp\Pool(
+            $client,
+            array_map(
+                function($image) {
+                    // We proxy this request to enable caching. We override the default ttl, 12 hours, with a 7 day ttl -- for the purposes of this kind-of thing, we really don't care that much if the image is out-of-date.
+                    return new \GuzzleHttp\Psr7\Request('GET', 'https://hamr.mmm.com/proxy?ttl=604800&url=' . $image);
+                },
+                array_column($this->queued_images, 2)
+            ),
+            [
+                'concurrency' => 20,
+                'rejected' => function ($reason, $index) {
+                    // do nothing
+                },
+                'fulfilled' => function (\GuzzleHttp\Psr7\Response $response, $index) {
+
+                    $contents = $response->getBody()->getContents();
+
+                    $size = getimagesizefromstring($contents);
+
+                    [$rowIndex, $cellNumber, $image] = $this->queued_images[$index];
+
+                    $image_name = sha1($image) . '-' . basename($image);
+
+                    // Write the anchor to the drawings file
+                    \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_drawing_file_pointer, '
+                        <xdr:twoCellAnchor>
+                            <xdr:from>
+                                <xdr:col>' . $cellNumber . '</xdr:col>
+                                <xdr:colOff>0</xdr:colOff>
+                                <xdr:row>' . ($rowIndex - 1) . '</xdr:row>
+                                <xdr:rowOff>0</xdr:rowOff>
+                            </xdr:from>
+                            <xdr:to>
+                                <xdr:col>' . $cellNumber . '</xdr:col>
+                                <xdr:colOff>' . $size[0] * 3000 . '</xdr:colOff>
+                                <xdr:row>' . ($rowIndex - 1) . '</xdr:row>
+                                <xdr:rowOff>1270000</xdr:rowOff>
+                            </xdr:to>
+                            <xdr:pic>
+                                <xdr:nvPicPr>
+                                    <xdr:cNvPr id="' . ++$this->current_image_offset . '" name="" descr="">
+                                    </xdr:cNvPr>
+                                    <xdr:cNvPicPr>
+                                        <a:picLocks noChangeAspect="1" noChangeArrowheads="1"/>
+                                    </xdr:cNvPicPr>
+                                </xdr:nvPicPr>
+                                <xdr:blipFill>
+                                    <a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="rId' . $this->current_image_offset . '">
+                                    </a:blip>
+                                    <a:srcRect/>
+                                    <a:stretch>
+                                        <a:fillRect/>
+                                    </a:stretch>
+                                </xdr:blipFill>
+                                <xdr:spPr bwMode="auto">
+                                    <a:xfrm>
+                                    </a:xfrm>
+                                    <a:prstGeom prst="rect">
+                                        <a:avLst/>
+                                    </a:prstGeom>
+                                    <a:noFill/>
+                                </xdr:spPr>
+                            </xdr:pic>
+                            <xdr:clientData/>
+                        </xdr:twoCellAnchor>
+                    ');
+
+                    // Write the relationship to the rels file
+                    \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_drawing_rels_file_pointer, '<Relationship Id="rId' . $this->current_image_offset . '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/' . $image_name.'" />');
+
+                    file_put_contents(
+                        \dirname($this->active_sheet->getFilePath())
+                            . '/../media/'
+                            . $image_name,
+                        $contents
+                    );
+                    // this is delivered each successful response
+                },
+            ]
+        );
+
+        // Initiate the transfers and create a promise
+        $promise = $pool->promise();
+
+        // Force the pool of requests to complete.
+        $promise->wait();
+
+
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_sheet_file_pointer, '<drawing r:id="rId1"/>');
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_sheet_file_pointer, '</worksheet>');
+
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered(
+            $this->active_drawing_file_pointer,
+            '</xdr:wsDr>'
+        );
+
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered(
+            $this->active_drawing_rels_file_pointer,
+            '</Relationships>'
+        );
+
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose_buffered($this->active_sheet_file_pointer);
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose_buffered($this->active_sheet_rels_file_pointer);
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose_buffered($this->active_drawing_file_pointer);
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose_buffered($this->active_drawing_rels_file_pointer);
+
     }
 
 

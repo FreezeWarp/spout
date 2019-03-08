@@ -47,6 +47,11 @@ class Cell
     const TYPE_ERROR = 6;
 
     /**
+     * Image cell type (requires special handling... a lot of it; assumes input is URLs)
+     */
+    const TYPE_IMAGE = 7;
+
+    /**
      * The value of this cell
      * @var mixed|null
      */
@@ -63,6 +68,12 @@ class Cell
      * @var Style
      */
     protected $style;
+
+    /**
+     * The cell tooltip
+     * @var tooltip
+     */
+    protected $tooltip;
 
     /**
      * @param $value mixed
@@ -89,6 +100,22 @@ class Cell
     public function getValue()
     {
         return $this->value;
+    }
+
+    /**
+     * @param String $tooltip
+     */
+    public function setTooltip(?String $tooltip)
+    {
+        $this->tooltip = $tooltip;
+    }
+
+    /**
+     * @return String
+     */
+    public function getTooltip(): ?String
+    {
+        return $this->tooltip;
     }
 
     /**
@@ -196,6 +223,14 @@ class Cell
     public function isError()
     {
         return $this->type === self::TYPE_ERROR;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isImage()
+    {
+        return $this->type === self::TYPE_IMAGE;
     }
 
     /**

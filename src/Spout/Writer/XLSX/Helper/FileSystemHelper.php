@@ -20,6 +20,8 @@ class FileSystemHelper extends \Box\Spout3\Common\Helper\FileSystemHelper implem
     const DOC_PROPS_FOLDER_NAME = 'docProps';
     const XL_FOLDER_NAME = 'xl';
     const WORKSHEETS_FOLDER_NAME = 'worksheets';
+    const DRAWINGS_FOLDER_NAME = 'drawings';
+    const MEDIA_FOLDER_NAME = 'media';
 
     const RELS_FILE_NAME = '.rels';
     const APP_XML_FILE_NAME = 'app.xml';
@@ -28,6 +30,7 @@ class FileSystemHelper extends \Box\Spout3\Common\Helper\FileSystemHelper implem
     const WORKBOOK_XML_FILE_NAME = 'workbook.xml';
     const WORKBOOK_RELS_XML_FILE_NAME = 'workbook.xml.rels';
     const STYLES_XML_FILE_NAME = 'styles.xml';
+
 
     /** @var ZipHelper Helper to perform tasks with Zip archive */
     private $zipHelper;
@@ -47,11 +50,22 @@ class FileSystemHelper extends \Box\Spout3\Common\Helper\FileSystemHelper implem
     /** @var string Path to the "xl" folder inside the root folder */
     private $xlFolder;
 
+    /** @var string Path to the "drawings" folder inside the root folder */
+    private $xlDrawingsFolder;
+
+    /** @var string Path to the "media" folder inside the root folder */
+    private $xlMediaFolder;
+
+    /** @var string Path to the "_rels" folder inside the media folder */
+    private $xlDrawingsRelsFolder;
+
     /** @var string Path to the "_rels" folder inside the "xl" folder */
     private $xlRelsFolder;
 
     /** @var string Path to the "worksheets" folder inside the "xl" folder */
     private $xlWorksheetsFolder;
+
+    private $xlWorksheetsRelsFolder;
 
     /**
      * @param string $baseFolderPath The path of the base folder where all the I/O can occur
@@ -101,7 +115,8 @@ class FileSystemHelper extends \Box\Spout3\Common\Helper\FileSystemHelper implem
             ->createRootFolder()
             ->createRelsFolderAndFile()
             ->createDocPropsFolderAndFiles()
-            ->createXlFolderAndSubFolders();
+            ->createXlFolderAndSubFolders()
+            ->createMediaFolderAndSubFolders();
     }
 
     /**
@@ -113,6 +128,23 @@ class FileSystemHelper extends \Box\Spout3\Common\Helper\FileSystemHelper implem
     private function createRootFolder()
     {
         $this->rootFolder = $this->createFolder($this->baseFolderRealPath, uniqid('xlsx', true));
+
+        return $this;
+    }
+
+    /**
+     * Creates the "drawings", "drawings/_rels", and "media" folders under the root folder
+     *
+     * @throws \Box\Spout3\Common\Exception\IOException If unable to create the folder or the ".rels" file
+     * @return FileSystemHelper
+     */
+    private function createMediaFolderAndSubFolders()
+    {
+        $this->xlMediaFolder = $this->createFolder($this->xlFolder, self::MEDIA_FOLDER_NAME);
+        $this->xlDrawingsFolder = $this->createFolder($this->xlFolder, self::DRAWINGS_FOLDER_NAME);
+        $this->xlDrawingsRelsFolder = $this->createFolder($this->xlDrawingsFolder, self::RELS_FOLDER_NAME);
+
+        $this->createRelsFile();
 
         return $this;
     }
@@ -252,6 +284,7 @@ EOD;
     private function createXlWorksheetsFolder()
     {
         $this->xlWorksheetsFolder = $this->createFolder($this->xlFolder, self::WORKSHEETS_FOLDER_NAME);
+        $this->xlWorksheetsRelsFolder = $this->createFolder($this->xlWorksheetsFolder, self::RELS_FOLDER_NAME);
 
         return $this;
     }
@@ -269,12 +302,16 @@ EOD;
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
     <Default ContentType="application/xml" Extension="xml"/>
     <Default ContentType="application/vnd.openxmlformats-package.relationships+xml" Extension="rels"/>
+    <Default ContentType="image/jpeg" Extension="jpg"/>
+    <Default ContentType="image/jpeg" Extension="jpeg"/>
+    
     <Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" PartName="/xl/workbook.xml"/>
 EOD;
 
         /** @var Worksheet $worksheet */
         foreach ($worksheets as $worksheet) {
             $contentTypesXmlFileContents .= '<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml" PartName="/xl/worksheets/sheet' . $worksheet->getId() . '.xml"/>';
+            $contentTypesXmlFileContents .= '<Override PartName="/xl/drawings/drawing' . $worksheet->getId() . '.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>';
         }
 
         $contentTypesXmlFileContents .= <<<'EOD'
