@@ -510,6 +510,7 @@ EOD;
                     $contents = $response->getBody()->getContents();
 
                     $size = getimagesizefromstring($contents);
+                    $dpi = hexdec(substr(bin2hex(substr($contents,14,4)),0,4));
 
                     [$rowIndex, $cellNumber, $image] = $this->queued_images[$index];
 
@@ -526,7 +527,7 @@ EOD;
                             </xdr:from>
                             <xdr:to>
                                 <xdr:col>' . $cellNumber . '</xdr:col>
-                                <xdr:colOff>' . $size[0] * 3000 . '</xdr:colOff>
+                                <xdr:colOff>' . $size[0] * 12000 . '</xdr:colOff>
                                 <xdr:row>' . ($rowIndex - 1) . '</xdr:row>
                                 <xdr:rowOff>1270000</xdr:rowOff>
                             </xdr:to>
