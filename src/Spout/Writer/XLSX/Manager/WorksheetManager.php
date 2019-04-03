@@ -561,7 +561,7 @@ EOD;
                     ');
 
                     // Write the relationship to the rels file
-                    \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_drawing_rels_file_pointer, '<Relationship Id="rId' . $this->current_image_offset . '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/' . $image_name.'" />');
+                    \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_drawing_rels_file_pointer, '<Relationship Id="rId' . $this->current_image_offset . '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/' . $image_name . '" />');
 
                     file_put_contents(
                         \dirname($this->active_sheet->getFilePath())
@@ -573,6 +573,9 @@ EOD;
                 },
             ]
         );
+
+        // Empty the queued images now that we've processed them
+        $this->queued_images = [];
 
         // Initiate the transfers and create a promise
         $promise = $pool->promise();
