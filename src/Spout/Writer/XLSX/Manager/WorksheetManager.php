@@ -574,14 +574,15 @@ EOD;
             ]
         );
 
-        // Empty the queued images now that we've processed them
-        $this->queued_images = [];
-
         // Initiate the transfers and create a promise
         $promise = $pool->promise();
 
         // Force the pool of requests to complete.
         $promise->wait();
+
+        // Empty the queued images now that we've processed them
+        // (needs to be after promise->wait(), since we reference queued_images in there)
+        $this->queued_images = [];
 
 
         \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->active_sheet_file_pointer, '<drawing r:id="rId1"/>');
