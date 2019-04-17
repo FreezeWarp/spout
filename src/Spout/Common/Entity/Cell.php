@@ -91,7 +91,6 @@ class Cell
     public function setValue($value)
     {
         $this->value = $value;
-        $this->type = $this->detectType($value);
     }
 
     /**
@@ -139,7 +138,11 @@ class Cell
      */
     public function getType()
     {
-        return $this->type;
+        if (!empty($this->type)) {
+            return $this->type;
+        } else {
+            return $this->type = $this->detectType($this->value);
+        }
     }
 
     /**
@@ -158,79 +161,24 @@ class Cell
      */
     protected function detectType($value)
     {
-        if (CellTypeHelper::isBoolean($value)) {
+        if (is_bool($value)) {
             return self::TYPE_BOOLEAN;
         }
-        if (CellTypeHelper::isEmpty($value)) {
+        if (empty($value)) {
             return self::TYPE_EMPTY;
         }
-        if (CellTypeHelper::isNumeric($value)) {
+        if (is_int($value) || is_bool($value)) {
             return self::TYPE_NUMERIC;
         }
-        if (CellTypeHelper::isDateTimeOrDateInterval($value)) {
+        if ($value instanceof \DateTime ||
+            $value instanceof \DateInterval) {
             return self::TYPE_DATE;
         }
-        if (CellTypeHelper::isNonEmptyString($value)) {
+        if (is_string($value)) {
             return self::TYPE_STRING;
         }
 
         return self::TYPE_ERROR;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isBoolean()
-    {
-        return $this->type === self::TYPE_BOOLEAN;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isEmpty()
-    {
-        return $this->type === self::TYPE_EMPTY;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isNumeric()
-    {
-        return $this->type === self::TYPE_NUMERIC;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isString()
-    {
-        return $this->type === self::TYPE_STRING;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isDate()
-    {
-        return $this->type === self::TYPE_DATE;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isError()
-    {
-        return $this->type === self::TYPE_ERROR;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isImage()
-    {
-        return $this->type === self::TYPE_IMAGE;
     }
 
     /**

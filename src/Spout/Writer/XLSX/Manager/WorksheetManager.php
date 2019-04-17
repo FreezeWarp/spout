@@ -293,9 +293,7 @@ EOD;
      */
     public function addRow(Worksheet $worksheet, Row $row)
     {
-        if (!$this->rowManager->isEmpty($row)) {
-            $this->addNonEmptyRow($worksheet, $row);
-        }
+        $this->addNonEmptyRow($worksheet, $row);
 
         $worksheet->setLastWrittenRowIndex($worksheet->getLastWrittenRowIndex() + 1);
     }
@@ -321,7 +319,7 @@ EOD;
 
         // if the row contains an image, set the height to 100
         foreach ($row->getCells() AS $cell) {
-            if ($cell->isImage()) {
+            if ($cell->getType() === Cell::TYPE_IMAGE) {
                 $rowXML .= ' ht="100" customHeight="1"';
                 break;
             }
@@ -396,12 +394,18 @@ EOD;
     {
 
         // special case: don't do anything if cell is empty and unstyled
-        if ($cell->isEmpty() && (!$styleId || !$this->styleManager->shouldApplyStyleOnEmptyCell($styleId))) {
+        if (
+            $cell->getType() === Cell::TYPE_EMPTY
+            && (
+                !$styleId
+                || !$this->styleManager->shouldApplyStyleOnEmptyCell($styleId)
+            )
+        ) {
             return '';
         }
 
         // special case: if cell is image, write it
-        if ($cell->isImage()) {
+        if ($cell->getType() === Cell::TYPE_IMAGE) {
             if (!empty($cell->getValue())) {
                 // Add the image to the queue of images to load
                 $this->queued_images[] = [$rowIndex, $cellNumber, $cell->getValue()];
@@ -419,16 +423,26 @@ EOD;
             $cellXML .= ' s="' . $styleId . '"';
         }
 
-        if ($cell->isString()) {
-            $cellXML .= $this->getCellXMLFragmentForNonEmptyString($cell->getValue());
-        } elseif ($cell->isBoolean()) {
-            $cellXML .= ' t="b"><v>' . (int) ($cell->getValue()) . '</v></c>';
-        } elseif ($cell->isNumeric()) {
-            $cellXML .= '><v>' . $cell->getValue() . '</v></c>';
-        } elseif ($cell->isEmpty()) {
-            $cellXML .= '/>';
-        } else {
-            throw new InvalidArgumentException('Trying to add a value with an unsupported type: ' . \gettype($cell->getValue()));
+        switch ($cell->getType()) {
+            case Cell::TYPE_STRING:
+                $cellXML .= $this->getCellXMLFragmentForNonEmptyString($cell->getValue());
+                break;
+
+            case Cell::TYPE_BOOLEAN:
+                $cellXML .= ' t="b"><v>' . (int) ($cell->getValue()) . '</v></c>';
+                break;
+
+            case Cell::TYPE_NUMERIC:
+                $cellXML .= '><v>' . $cell->getValue() . '</v></c>';
+                break;
+
+            case Cell::TYPE_EMPTY:
+                $cellXML .= '/>';
+                break;
+
+            default:
+                throw new InvalidArgumentException('Trying to add a value with an unsupported type: ' . \gettype($cell->getValue()));
+                break;
         }
 
         return $cellXML;
