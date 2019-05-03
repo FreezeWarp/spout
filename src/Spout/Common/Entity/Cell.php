@@ -167,7 +167,7 @@ class Cell
         if (empty($value)) {
             return self::TYPE_EMPTY;
         }
-        if (is_int($value) || is_bool($value)) {
+        if (is_int($value) || is_float($value) || is_bool($value)) {
             return self::TYPE_NUMERIC;
         }
         if ($value instanceof \DateTime ||
