@@ -407,6 +407,11 @@ EOD;
                 $cellXML .= '><v>' . $cell->getValue() . '</v></c>';
                 break;
 
+            case Cell::TYPE_LINK:
+                $escaped_value = $this->stringsEscaper->escape($cell->getValue());
+                $cellXML .= " t=\"str\"><f>HYPERLINK(&quot;{$escaped_value}&quot;)</f><v>{$escaped_value}</v></c>";
+                break;
+
             case Cell::TYPE_EMPTY:
                 $cellXML .= '/>';
                 break;

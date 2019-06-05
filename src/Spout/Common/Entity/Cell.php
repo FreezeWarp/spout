@@ -52,6 +52,11 @@ class Cell
     const TYPE_IMAGE = 7;
 
     /**
+     * Link cell type (requires special handling)
+     */
+    const TYPE_LINK = 8;
+
+    /**
      * The value of this cell
      * @var mixed|null
      */
