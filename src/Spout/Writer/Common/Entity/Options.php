@@ -1,6 +1,6 @@
 <?php
 
-namespace Box\Spout\Writer\Common\Entity;
+namespace Box\Spout3\Writer\Common\Entity;
 
 /**
  * Class Options

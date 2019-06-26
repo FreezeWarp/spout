@@ -1,14 +1,14 @@
 <?php
 
-namespace Box\Spout\Writer\Common\Manager;
+namespace Box\Spout3\Writer\Common\Manager;
 
-use Box\Spout\Common\Entity\Row;
-use Box\Spout\Common\Exception\IOException;
-use Box\Spout\Writer\Common\Entity\Sheet;
-use Box\Spout\Writer\Common\Entity\Workbook;
-use Box\Spout\Writer\Common\Entity\Worksheet;
-use Box\Spout\Writer\Exception\SheetNotFoundException;
-use Box\Spout\Writer\Exception\WriterException;
+use Box\Spout3\Common\Entity\Row;
+use Box\Spout3\Common\Exception\IOException;
+use Box\Spout3\Writer\Common\Entity\Sheet;
+use Box\Spout3\Writer\Common\Entity\Workbook;
+use Box\Spout3\Writer\Common\Entity\Worksheet;
+use Box\Spout3\Writer\Exception\SheetNotFoundException;
+use Box\Spout3\Writer\Exception\WriterException;
 
 /**
  * Interface WorkbookManagerInterface
@@ -28,7 +28,7 @@ interface WorkbookManagerInterface
      * @throws IOException If unable to open the sheet for writing
      * @return Worksheet The created sheet
      */
-    public function addNewSheetAndMakeItCurrent();
+    public function addNewSheetAndMakeItCurrent($options = []);
 
     /**
      * @return Worksheet[] All the workbook's sheets

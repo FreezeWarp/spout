@@ -1,14 +1,14 @@
 <?php
 
-namespace Box\Spout\Writer\XLSX\Manager\Style;
+namespace Box\Spout3\Writer\XLSX\Manager\Style;
 
-use Box\Spout\Common\Entity\Style\Style;
+use Box\Spout3\Common\Entity\Style\Style;
 
 /**
  * Class StyleRegistry
  * Registry for all used styles
  */
-class StyleRegistry extends \Box\Spout\Writer\Common\Manager\Style\StyleRegistry
+class StyleRegistry extends \Box\Spout3\Writer\Common\Manager\Style\StyleRegistry
 {
     /**
      * @var array

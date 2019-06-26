@@ -1,25 +1,27 @@
 <?php
 
-namespace Box\Spout\Writer\XLSX\Helper;
+namespace Box\Spout3\Writer\XLSX\Helper;
 
-use Box\Spout\Writer\Common\Entity\Worksheet;
-use Box\Spout\Writer\Common\Helper\FileSystemWithRootFolderHelperInterface;
-use Box\Spout\Writer\Common\Helper\ZipHelper;
-use Box\Spout\Writer\XLSX\Manager\Style\StyleManager;
+use Box\Spout3\Writer\Common\Entity\Worksheet;
+use Box\Spout3\Writer\Common\Helper\FileSystemWithRootFolderHelperInterface;
+use Box\Spout3\Writer\Common\Helper\ZipHelper;
+use Box\Spout3\Writer\XLSX\Manager\Style\StyleManager;
 
 /**
  * Class FileSystemHelper
  * This class provides helper functions to help with the file system operations
  * like files/folders creation & deletion for XLSX files
  */
-class FileSystemHelper extends \Box\Spout\Common\Helper\FileSystemHelper implements FileSystemWithRootFolderHelperInterface
+class FileSystemHelper extends \Box\Spout3\Common\Helper\FileSystemHelper implements FileSystemWithRootFolderHelperInterface
 {
-    const APP_NAME = 'Spout';
+    const APP_NAME = 'HAMR XLSX Writer (Using Spout)';
 
     const RELS_FOLDER_NAME = '_rels';
     const DOC_PROPS_FOLDER_NAME = 'docProps';
     const XL_FOLDER_NAME = 'xl';
     const WORKSHEETS_FOLDER_NAME = 'worksheets';
+    const DRAWINGS_FOLDER_NAME = 'drawings';
+    const MEDIA_FOLDER_NAME = 'media';
 
     const RELS_FILE_NAME = '.rels';
     const APP_XML_FILE_NAME = 'app.xml';
@@ -29,10 +31,11 @@ class FileSystemHelper extends \Box\Spout\Common\Helper\FileSystemHelper impleme
     const WORKBOOK_RELS_XML_FILE_NAME = 'workbook.xml.rels';
     const STYLES_XML_FILE_NAME = 'styles.xml';
 
+
     /** @var ZipHelper Helper to perform tasks with Zip archive */
     private $zipHelper;
 
-    /** @var \Box\Spout\Common\Helper\Escaper\XLSX Used to escape XML data */
+    /** @var \Box\Spout3\Common\Helper\Escaper\XLSX Used to escape XML data */
     private $escaper;
 
     /** @var string Path to the root folder inside the temp folder where the files to create the XLSX will be stored */
@@ -47,16 +50,27 @@ class FileSystemHelper extends \Box\Spout\Common\Helper\FileSystemHelper impleme
     /** @var string Path to the "xl" folder inside the root folder */
     private $xlFolder;
 
+    /** @var string Path to the "drawings" folder inside the root folder */
+    private $xlDrawingsFolder;
+
+    /** @var string Path to the "media" folder inside the root folder */
+    private $xlMediaFolder;
+
+    /** @var string Path to the "_rels" folder inside the media folder */
+    private $xlDrawingsRelsFolder;
+
     /** @var string Path to the "_rels" folder inside the "xl" folder */
     private $xlRelsFolder;
 
     /** @var string Path to the "worksheets" folder inside the "xl" folder */
     private $xlWorksheetsFolder;
 
+    private $xlWorksheetsRelsFolder;
+
     /**
      * @param string $baseFolderPath The path of the base folder where all the I/O can occur
      * @param ZipHelper $zipHelper Helper to perform tasks with Zip archive
-     * @param \Box\Spout\Common\Helper\Escaper\XLSX $escaper Used to escape XML data
+     * @param \Box\Spout3\Common\Helper\Escaper\XLSX $escaper Used to escape XML data
      */
     public function __construct($baseFolderPath, $zipHelper, $escaper)
     {
@@ -92,7 +106,7 @@ class FileSystemHelper extends \Box\Spout\Common\Helper\FileSystemHelper impleme
     /**
      * Creates all the folders needed to create a XLSX file, as well as the files that won't change.
      *
-     * @throws \Box\Spout\Common\Exception\IOException If unable to create at least one of the base folders
+     * @throws \Box\Spout3\Common\Exception\IOException If unable to create at least one of the base folders
      * @return void
      */
     public function createBaseFilesAndFolders()
@@ -101,13 +115,14 @@ class FileSystemHelper extends \Box\Spout\Common\Helper\FileSystemHelper impleme
             ->createRootFolder()
             ->createRelsFolderAndFile()
             ->createDocPropsFolderAndFiles()
-            ->createXlFolderAndSubFolders();
+            ->createXlFolderAndSubFolders()
+            ->createMediaFolderAndSubFolders();
     }
 
     /**
      * Creates the folder that will be used as root
      *
-     * @throws \Box\Spout\Common\Exception\IOException If unable to create the folder
+     * @throws \Box\Spout3\Common\Exception\IOException If unable to create the folder
      * @return FileSystemHelper
      */
     private function createRootFolder()
@@ -118,9 +133,26 @@ class FileSystemHelper extends \Box\Spout\Common\Helper\FileSystemHelper impleme
     }
 
     /**
+     * Creates the "drawings", "drawings/_rels", and "media" folders under the root folder
+     *
+     * @throws \Box\Spout3\Common\Exception\IOException If unable to create the folder or the ".rels" file
+     * @return FileSystemHelper
+     */
+    private function createMediaFolderAndSubFolders()
+    {
+        $this->xlMediaFolder = $this->createFolder($this->xlFolder, self::MEDIA_FOLDER_NAME);
+        $this->xlDrawingsFolder = $this->createFolder($this->xlFolder, self::DRAWINGS_FOLDER_NAME);
+        $this->xlDrawingsRelsFolder = $this->createFolder($this->xlDrawingsFolder, self::RELS_FOLDER_NAME);
+
+        $this->createRelsFile();
+
+        return $this;
+    }
+
+    /**
      * Creates the "_rels" folder under the root folder as well as the ".rels" file in it
      *
-     * @throws \Box\Spout\Common\Exception\IOException If unable to create the folder or the ".rels" file
+     * @throws \Box\Spout3\Common\Exception\IOException If unable to create the folder or the ".rels" file
      * @return FileSystemHelper
      */
     private function createRelsFolderAndFile()
@@ -135,7 +167,7 @@ class FileSystemHelper extends \Box\Spout\Common\Helper\FileSystemHelper impleme
     /**
      * Creates the ".rels" file under the "_rels" folder (under root)
      *
-     * @throws \Box\Spout\Common\Exception\IOException If unable to create the file
+     * @throws \Box\Spout3\Common\Exception\IOException If unable to create the file
      * @return FileSystemHelper
      */
     private function createRelsFile()
@@ -157,7 +189,7 @@ EOD;
     /**
      * Creates the "docProps" folder under the root folder as well as the "app.xml" and "core.xml" files in it
      *
-     * @throws \Box\Spout\Common\Exception\IOException If unable to create the folder or one of the files
+     * @throws \Box\Spout3\Common\Exception\IOException If unable to create the folder or one of the files
      * @return FileSystemHelper
      */
     private function createDocPropsFolderAndFiles()
@@ -173,7 +205,7 @@ EOD;
     /**
      * Creates the "app.xml" file under the "docProps" folder
      *
-     * @throws \Box\Spout\Common\Exception\IOException If unable to create the file
+     * @throws \Box\Spout3\Common\Exception\IOException If unable to create the file
      * @return FileSystemHelper
      */
     private function createAppXmlFile()
@@ -195,7 +227,7 @@ EOD;
     /**
      * Creates the "core.xml" file under the "docProps" folder
      *
-     * @throws \Box\Spout\Common\Exception\IOException If unable to create the file
+     * @throws \Box\Spout3\Common\Exception\IOException If unable to create the file
      * @return FileSystemHelper
      */
     private function createCoreXmlFile()
@@ -218,7 +250,7 @@ EOD;
     /**
      * Creates the "xl" folder under the root folder as well as its subfolders
      *
-     * @throws \Box\Spout\Common\Exception\IOException If unable to create at least one of the folders
+     * @throws \Box\Spout3\Common\Exception\IOException If unable to create at least one of the folders
      * @return FileSystemHelper
      */
     private function createXlFolderAndSubFolders()
@@ -233,7 +265,7 @@ EOD;
     /**
      * Creates the "_rels" folder under the "xl" folder
      *
-     * @throws \Box\Spout\Common\Exception\IOException If unable to create the folder
+     * @throws \Box\Spout3\Common\Exception\IOException If unable to create the folder
      * @return FileSystemHelper
      */
     private function createXlRelsFolder()
@@ -246,12 +278,13 @@ EOD;
     /**
      * Creates the "worksheets" folder under the "xl" folder
      *
-     * @throws \Box\Spout\Common\Exception\IOException If unable to create the folder
+     * @throws \Box\Spout3\Common\Exception\IOException If unable to create the folder
      * @return FileSystemHelper
      */
     private function createXlWorksheetsFolder()
     {
         $this->xlWorksheetsFolder = $this->createFolder($this->xlFolder, self::WORKSHEETS_FOLDER_NAME);
+        $this->xlWorksheetsRelsFolder = $this->createFolder($this->xlWorksheetsFolder, self::RELS_FOLDER_NAME);
 
         return $this;
     }
@@ -269,12 +302,16 @@ EOD;
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
     <Default ContentType="application/xml" Extension="xml"/>
     <Default ContentType="application/vnd.openxmlformats-package.relationships+xml" Extension="rels"/>
+    <Default ContentType="image/jpeg" Extension="jpg"/>
+    <Default ContentType="image/jpeg" Extension="jpeg"/>
+    
     <Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" PartName="/xl/workbook.xml"/>
 EOD;
 
         /** @var Worksheet $worksheet */
         foreach ($worksheets as $worksheet) {
             $contentTypesXmlFileContents .= '<Override ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml" PartName="/xl/worksheets/sheet' . $worksheet->getId() . '.xml"/>';
+            $contentTypesXmlFileContents .= '<Override PartName="/xl/drawings/drawing' . $worksheet->getId() . '.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>';
         }
 
         $contentTypesXmlFileContents .= <<<'EOD'
@@ -301,6 +338,7 @@ EOD;
         $workbookXmlFileContents = <<<'EOD'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+    <bookViews><workbookView xWindow="0" yWindow="0"/></bookViews>
     <sheets>
 EOD;
 

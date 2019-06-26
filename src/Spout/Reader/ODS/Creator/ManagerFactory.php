@@ -1,8 +1,8 @@
 <?php
 
-namespace Box\Spout\Reader\ODS\Creator;
+namespace Box\Spout3\Reader\ODS\Creator;
 
-use Box\Spout\Reader\Common\Manager\RowManager;
+use Box\Spout3\Reader\Common\Manager\RowManager;
 
 /**
  * Class ManagerFactory

@@ -1,9 +1,9 @@
 <?php
 
-namespace Box\Spout\Reader\XLSX\Manager\SharedStringsCaching;
+namespace Box\Spout3\Reader\XLSX\Manager\SharedStringsCaching;
 
-use Box\Spout\Reader\Exception\SharedStringNotFoundException;
-use Box\Spout\Reader\XLSX\Creator\HelperFactory;
+use Box\Spout3\Reader\Exception\SharedStringNotFoundException;
+use Box\Spout3\Reader\XLSX\Creator\HelperFactory;
 
 /**
  * Class FileBasedStrategy
@@ -17,10 +17,10 @@ class FileBasedStrategy implements CachingStrategyInterface
     /** Value to use to escape the line feed character ("\n") */
     const ESCAPED_LINE_FEED_CHARACTER = '_x000A_';
 
-    /** @var \Box\Spout\Common\Helper\GlobalFunctionsHelper Helper to work with global functions */
+    /** @var \Box\Spout3\Common\Helper\GlobalFunctionsHelper Helper to work with global functions */
     protected $globalFunctionsHelper;
 
-    /** @var \Box\Spout\Common\Helper\FileSystemHelper Helper to perform file system operations */
+    /** @var \Box\Spout3\Common\Helper\FileSystemHelper Helper to perform file system operations */
     protected $fileSystemHelper;
 
     /** @var string Temporary folder where the temporary files will be created */
@@ -85,7 +85,7 @@ class FileBasedStrategy implements CachingStrategyInterface
         // Encoding the line feed character allows to preserve this assumption
         $lineFeedEncodedSharedString = $this->escapeLineFeed($sharedString);
 
-        $this->globalFunctionsHelper->fwrite($this->tempFilePointer, $lineFeedEncodedSharedString . PHP_EOL);
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($this->tempFilePointer, $lineFeedEncodedSharedString . PHP_EOL);
     }
 
     /**
@@ -111,7 +111,7 @@ class FileBasedStrategy implements CachingStrategyInterface
     {
         // close pointer to the last temp file that was written
         if ($this->tempFilePointer) {
-            $this->globalFunctionsHelper->fclose($this->tempFilePointer);
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose_buffered($this->tempFilePointer);
         }
     }
 
@@ -119,7 +119,7 @@ class FileBasedStrategy implements CachingStrategyInterface
      * Returns the string located at the given index from the cache.
      *
      * @param int $sharedStringIndex Index of the shared string in the sharedStrings.xml file
-     * @throws \Box\Spout\Reader\Exception\SharedStringNotFoundException If no shared string found for the given index
+     * @throws \Box\Spout3\Reader\Exception\SharedStringNotFoundException If no shared string found for the given index
      * @return string The shared string at the given index
      */
     public function getStringAtIndex($sharedStringIndex)

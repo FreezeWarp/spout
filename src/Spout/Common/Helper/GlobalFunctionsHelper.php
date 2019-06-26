@@ -1,6 +1,6 @@
 <?php
 
-namespace Box\Spout\Common\Helper;
+namespace Box\Spout3\Common\Helper;
 
 /**
  * Class GlobalFunctionsHelper
@@ -10,6 +10,17 @@ namespace Box\Spout\Common\Helper;
  */
 class GlobalFunctionsHelper
 {
+
+    /**
+     * @var array An array of current string buffers associated by resource ID.
+     */
+    static $buffers = [];
+
+    /**
+     * @var int The number of bytes to buffer fwrites to.
+     */
+    static $buffer_size = 1024 * 1024;
+
     /**
      * Wrapper around global function fopen()
      * @see fopen()
@@ -21,6 +32,23 @@ class GlobalFunctionsHelper
     public function fopen($fileName, $mode)
     {
         return fopen($fileName, $mode);
+    }
+
+    /**
+     * Wrapper around global function fopen(), with buffering enabled.
+     * @see fopen()
+     *
+     * @param string $fileName
+     * @param string $mode
+     * @return resource|bool
+     */
+    public static function fopen_buffered($fileName, $mode)
+    {
+        $resource = fopen($fileName, $mode);
+
+        stream_set_chunk_size($resource, self::$buffer_size); // Prevent out buffer from being broken up into multiple, smaller-sized chunks when we go to fwrite.
+
+        return $resource;
     }
 
     /**
@@ -126,7 +154,45 @@ class GlobalFunctionsHelper
      */
     public function fwrite($handle, $string)
     {
+
         return fwrite($handle, $string);
+
+    }
+
+
+    /**
+     * Wrapper around global function fwrite() that enables buffering
+     * @see fwrite()
+     *
+     * @param resource $handle
+     * @param string $string
+     * @return int
+     */
+    public static function fwrite_buffered($handle, $string)
+    {
+
+        if (strlen($string) > self::$buffer_size) {
+            return fwrite($handle, (self::$buffers[intval($handle)] ?? '') . $string);
+        }
+
+        else if (!isset(self::$buffers[intval($handle)])) {
+            self::$buffers[intval($handle)] = $string;
+        }
+
+        else {
+            self::$buffers[intval($handle)] .= $string;
+
+            if (strlen(self::$buffers[intval($handle)]) > self::$buffer_size) {
+                $res = fwrite($handle, self::$buffers[intval($handle)]);
+
+                unset(self::$buffers[intval($handle)]);
+
+                return $res;
+            }
+        }
+
+        return 0;
+
     }
 
     /**
@@ -139,6 +205,24 @@ class GlobalFunctionsHelper
     public function fclose($handle)
     {
         return fclose($handle);
+    }
+
+    /**
+     * Wrapper around global function fclose() that clears appropriate buffers from {@see self::fwrite_buffered()}
+     * @see fclose()
+     *
+     * @param resource $handle
+     * @return bool
+     */
+    public static function fclose_buffered($handle)
+    {
+
+        if (isset(self::$buffers[intval($handle)])) {
+            fwrite($handle, self::$buffers[intval($handle)]);
+        }
+
+        return fclose($handle);
+
     }
 
     /**

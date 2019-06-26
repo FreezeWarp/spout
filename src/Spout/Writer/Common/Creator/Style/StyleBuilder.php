@@ -1,9 +1,9 @@
 <?php
 
-namespace Box\Spout\Writer\Common\Creator\Style;
+namespace Box\Spout3\Writer\Common\Creator\Style;
 
-use Box\Spout\Common\Entity\Style\Border;
-use Box\Spout\Common\Entity\Style\Style;
+use Box\Spout3\Common\Entity\Style\Border;
+use Box\Spout3\Common\Entity\Style\Style;
 
 /**
  * Class StyleBuilder

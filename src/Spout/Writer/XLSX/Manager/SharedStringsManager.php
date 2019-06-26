@@ -1,9 +1,9 @@
 <?php
 
-namespace Box\Spout\Writer\XLSX\Manager;
+namespace Box\Spout3\Writer\XLSX\Manager;
 
-use Box\Spout\Common\Exception\IOException;
-use Box\Spout\Common\Helper\Escaper;
+use Box\Spout3\Common\Exception\IOException;
+use Box\Spout3\Common\Helper\Escaper;
 
 /**
  * Class SharedStringsManager
@@ -54,7 +54,7 @@ EOD;
     /**
      * Checks if the book has been created. Throws an exception if not created yet.
      *
-     * @throws \Box\Spout\Common\Exception\IOException If the sheet data file cannot be opened for writing
+     * @throws \Box\Spout3\Common\Exception\IOException If the sheet data file cannot be opened for writing
      * @return void
      */
     protected function throwIfSharedStringsFilePointerIsNotAvailable()

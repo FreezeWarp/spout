@@ -1,6 +1,6 @@
 <?php
 
-namespace Box\Spout\Writer\Common\Helper;
+namespace Box\Spout3\Writer\Common\Helper;
 
 /**
  * Class CellHelper

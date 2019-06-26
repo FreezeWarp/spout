@@ -1,15 +1,15 @@
 <?php
 
-namespace Box\Spout\Reader\ODS\Creator;
+namespace Box\Spout3\Reader\ODS\Creator;
 
-use Box\Spout\Reader\ODS\Helper\CellValueFormatter;
-use Box\Spout\Reader\ODS\Helper\SettingsHelper;
+use Box\Spout3\Reader\ODS\Helper\CellValueFormatter;
+use Box\Spout3\Reader\ODS\Helper\SettingsHelper;
 
 /**
  * Class EntityFactory
  * Factory to create helpers
  */
-class HelperFactory extends \Box\Spout\Common\Creator\HelperFactory
+class HelperFactory extends \Box\Spout3\Common\Creator\HelperFactory
 {
     /**
      * @param bool $shouldFormatDates Whether date/time values should be returned as PHP objects or be formatted as strings
@@ -32,11 +32,11 @@ class HelperFactory extends \Box\Spout\Common\Creator\HelperFactory
     }
 
     /**
-     * @return \Box\Spout\Common\Helper\Escaper\ODS
+     * @return \Box\Spout3\Common\Helper\Escaper\ODS
      */
     public function createStringsEscaper()
     {
         /* @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
-        return new \Box\Spout\Common\Helper\Escaper\ODS();
+        return new \Box\Spout3\Common\Helper\Escaper\ODS();
     }
 }

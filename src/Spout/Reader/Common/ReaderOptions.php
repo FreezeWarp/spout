@@ -1,6 +1,6 @@
 <?php
 
-namespace Box\Spout\Reader\Common;
+namespace Box\Spout3\Reader\Common;
 
 /**
  * Class ReaderOptions

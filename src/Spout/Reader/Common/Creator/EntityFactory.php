@@ -1,9 +1,9 @@
 <?php
 
-namespace Box\Spout\Reader\Common\Creator;
+namespace Box\Spout3\Reader\Common\Creator;
 
-use Box\Spout\Reader\ReaderFactory;
-use Box\Spout\Reader\ReaderInterface;
+use Box\Spout3\Reader\ReaderFactory;
+use Box\Spout3\Reader\ReaderInterface;
 
 /**
  * Class EntityFactory
@@ -15,7 +15,7 @@ class EntityFactory
      * This creates an instance of the appropriate reader, given the type of the file to be read
      *
      * @param  string $readerType Type of the reader to instantiate
-     * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
+     * @throws \Box\Spout3\Common\Exception\UnsupportedTypeException
      * @return ReaderInterface
      */
     public static function createReader($readerType)

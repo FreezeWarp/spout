@@ -1,10 +1,10 @@
 <?php
 
-namespace Box\Spout\Writer\Common\Creator;
+namespace Box\Spout3\Writer\Common\Creator;
 
-use Box\Spout\Common\Manager\OptionsManagerInterface;
-use Box\Spout\Writer\Common\Manager\SheetManager;
-use Box\Spout\Writer\Common\Manager\WorkbookManagerInterface;
+use Box\Spout3\Common\Manager\OptionsManagerInterface;
+use Box\Spout3\Writer\Common\Manager\SheetManager;
+use Box\Spout3\Writer\Common\Manager\WorkbookManagerInterface;
 
 /**
  * Interface ManagerFactoryInterface

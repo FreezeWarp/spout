@@ -1,8 +1,8 @@
 <?php
 
-namespace Box\Spout\Reader\ODS\Helper;
+namespace Box\Spout3\Reader\ODS\Helper;
 
-use Box\Spout\Reader\Exception\InvalidValueException;
+use Box\Spout3\Reader\Exception\InvalidValueException;
 
 /**
  * Class CellValueFormatter
@@ -38,12 +38,12 @@ class CellValueFormatter
     /** @var bool Whether date/time values should be returned as PHP objects or be formatted as strings */
     protected $shouldFormatDates;
 
-    /** @var \Box\Spout\Common\Helper\Escaper\ODS Used to unescape XML data */
+    /** @var \Box\Spout3\Common\Helper\Escaper\ODS Used to unescape XML data */
     protected $escaper;
 
     /**
      * @param bool $shouldFormatDates Whether date/time values should be returned as PHP objects or be formatted as strings
-     * @param \Box\Spout\Common\Helper\Escaper\ODS $escaper Used to unescape XML data
+     * @param \Box\Spout3\Common\Helper\Escaper\ODS $escaper Used to unescape XML data
      */
     public function __construct($shouldFormatDates, $escaper)
     {

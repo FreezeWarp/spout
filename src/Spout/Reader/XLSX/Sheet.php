@@ -1,8 +1,8 @@
 <?php
 
-namespace Box\Spout\Reader\XLSX;
+namespace Box\Spout3\Reader\XLSX;
 
-use Box\Spout\Reader\SheetInterface;
+use Box\Spout3\Reader\SheetInterface;
 
 /**
  * Class Sheet
@@ -10,7 +10,7 @@ use Box\Spout\Reader\SheetInterface;
  */
 class Sheet implements SheetInterface
 {
-    /** @var \Box\Spout\Reader\XLSX\RowIterator To iterate over sheet's rows */
+    /** @var \Box\Spout3\Reader\XLSX\RowIterator To iterate over sheet's rows */
     protected $rowIterator;
 
     /** @var int Index of the sheet, based on order in the workbook (zero-based) */
@@ -42,7 +42,7 @@ class Sheet implements SheetInterface
     }
 
     /**
-     * @return \Box\Spout\Reader\XLSX\RowIterator
+     * @return \Box\Spout3\Reader\XLSX\RowIterator
      */
     public function getRowIterator()
     {

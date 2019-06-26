@@ -1,8 +1,8 @@
 <?php
 
-namespace Box\Spout\Writer\Common\Helper;
+namespace Box\Spout3\Writer\Common\Helper;
 
-use Box\Spout\Writer\Common\Creator\InternalEntityFactory;
+use Box\Spout3\Writer\Common\Creator\InternalEntityFactory;
 
 /**
  * Class ZipHelper

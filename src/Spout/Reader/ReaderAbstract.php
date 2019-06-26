@@ -1,13 +1,13 @@
 <?php
 
-namespace Box\Spout\Reader;
+namespace Box\Spout3\Reader;
 
-use Box\Spout\Common\Exception\IOException;
-use Box\Spout\Common\Helper\GlobalFunctionsHelper;
-use Box\Spout\Common\Manager\OptionsManagerInterface;
-use Box\Spout\Reader\Common\Creator\InternalEntityFactoryInterface;
-use Box\Spout\Reader\Common\Entity\Options;
-use Box\Spout\Reader\Exception\ReaderNotOpenedException;
+use Box\Spout3\Common\Exception\IOException;
+use Box\Spout3\Common\Helper\GlobalFunctionsHelper;
+use Box\Spout3\Common\Manager\OptionsManagerInterface;
+use Box\Spout3\Reader\Common\Creator\InternalEntityFactoryInterface;
+use Box\Spout3\Reader\Common\Entity\Options;
+use Box\Spout3\Reader\Exception\ReaderNotOpenedException;
 
 /**
  * Class ReaderAbstract
@@ -22,7 +22,7 @@ abstract class ReaderAbstract implements ReaderInterface
     /** @var InternalEntityFactoryInterface Factory to create entities */
     protected $entityFactory;
 
-    /** @var \Box\Spout\Common\Helper\GlobalFunctionsHelper Helper to work with global functions */
+    /** @var \Box\Spout3\Common\Helper\GlobalFunctionsHelper Helper to work with global functions */
     protected $globalFunctionsHelper;
 
     /** @var OptionsManagerInterface Writer options manager */
@@ -103,7 +103,7 @@ abstract class ReaderAbstract implements ReaderInterface
      * that the file exists and is readable.
      *
      * @param  string $filePath Path of the file to be read
-     * @throws \Box\Spout\Common\Exception\IOException If the file at the given path does not exist, is not readable or is corrupted
+     * @throws \Box\Spout3\Common\Exception\IOException If the file at the given path does not exist, is not readable or is corrupted
      * @return void
      */
     public function open($filePath)
@@ -210,7 +210,7 @@ abstract class ReaderAbstract implements ReaderInterface
     /**
      * Returns an iterator to iterate over sheets.
      *
-     * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException If called before opening the reader
+     * @throws \Box\Spout3\Reader\Exception\ReaderNotOpenedException If called before opening the reader
      * @return \Iterator To iterate over sheets
      */
     public function getSheetIterator()

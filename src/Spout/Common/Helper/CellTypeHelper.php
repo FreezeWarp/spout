@@ -1,6 +1,6 @@
 <?php
 
-namespace Box\Spout\Common\Helper;
+namespace Box\Spout3\Common\Helper;
 
 /**
  * Class CellTypeHelper

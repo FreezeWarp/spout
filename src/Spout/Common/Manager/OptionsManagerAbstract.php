@@ -1,6 +1,6 @@
 <?php
 
-namespace Box\Spout\Common\Manager;
+namespace Box\Spout3\Common\Manager;
 
 /**
  * Class OptionsManager

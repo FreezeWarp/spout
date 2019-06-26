@@ -1,8 +1,8 @@
 <?php
 
-namespace Box\Spout\Common\Entity\Style;
+namespace Box\Spout3\Common\Entity\Style;
 
-use Box\Spout\Common\Exception\InvalidColorException;
+use Box\Spout3\Common\Exception\InvalidColorException;
 
 /**
  * Class Color
@@ -49,7 +49,7 @@ class Color
      * Throws an exception is the color component value is outside of bounds (0 - 255)
      *
      * @param int $colorComponent
-     * @throws \Box\Spout\Common\Exception\InvalidColorException
+     * @throws \Box\Spout3\Common\Exception\InvalidColorException
      * @return void
      */
     protected static function throwIfInvalidColorComponentValue($colorComponent)

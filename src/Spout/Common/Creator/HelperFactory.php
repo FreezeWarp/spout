@@ -1,11 +1,11 @@
 <?php
 
-namespace Box\Spout\Common\Creator;
+namespace Box\Spout3\Common\Creator;
 
-use Box\Spout\Common\Helper\EncodingHelper;
-use Box\Spout\Common\Helper\FileSystemHelper;
-use Box\Spout\Common\Helper\GlobalFunctionsHelper;
-use Box\Spout\Common\Helper\StringHelper;
+use Box\Spout3\Common\Helper\EncodingHelper;
+use Box\Spout3\Common\Helper\FileSystemHelper;
+use Box\Spout3\Common\Helper\GlobalFunctionsHelper;
+use Box\Spout3\Common\Helper\StringHelper;
 
 /**
  * Class HelperFactory

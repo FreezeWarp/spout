@@ -1,9 +1,9 @@
 <?php
 
-namespace Box\Spout\Writer\Exception\Border;
+namespace Box\Spout3\Writer\Exception\Border;
 
-use Box\Spout\Common\Entity\Style\BorderPart;
-use Box\Spout\Writer\Exception\WriterException;
+use Box\Spout3\Common\Entity\Style\BorderPart;
+use Box\Spout3\Writer\Exception\WriterException;
 
 class InvalidStyleException extends WriterException
 {

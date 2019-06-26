@@ -1,9 +1,9 @@
 <?php
 
-namespace Box\Spout\Common\Entity;
+namespace Box\Spout3\Common\Entity;
 
-use Box\Spout\Common\Entity\Style\Style;
-use Box\Spout\Common\Helper\CellTypeHelper;
+use Box\Spout3\Common\Entity\Style\Style;
+use Box\Spout3\Common\Helper\CellTypeHelper;
 
 /**
  * Class Cell
@@ -47,6 +47,16 @@ class Cell
     const TYPE_ERROR = 6;
 
     /**
+     * Image cell type (requires special handling... a lot of it; assumes input is URLs)
+     */
+    const TYPE_IMAGE = 7;
+
+    /**
+     * Link cell type (requires special handling)
+     */
+    const TYPE_LINK = 8;
+
+    /**
      * The value of this cell
      * @var mixed|null
      */
@@ -65,10 +75,16 @@ class Cell
     protected $style;
 
     /**
+     * The cell tooltip
+     * @var tooltip
+     */
+    protected $tooltip;
+
+    /**
      * @param $value mixed
      * @param Style|null $style
      */
-    public function __construct($value, Style $style = null)
+    public function __construct($value, ?Style $style = null)
     {
         $this->setValue($value);
         $this->setStyle($style);
@@ -80,7 +96,6 @@ class Cell
     public function setValue($value)
     {
         $this->value = $value;
-        $this->type = $this->detectType($value);
     }
 
     /**
@@ -92,17 +107,33 @@ class Cell
     }
 
     /**
+     * @param String $tooltip
+     */
+    public function setTooltip(?String $tooltip)
+    {
+        $this->tooltip = $tooltip;
+    }
+
+    /**
+     * @return String
+     */
+    public function getTooltip(): ?String
+    {
+        return $this->tooltip;
+    }
+
+    /**
      * @param Style|null $style
      */
-    public function setStyle($style)
+    public function setStyle(?Style $style)
     {
-        $this->style = $style ?: new Style();
+        $this->style = $style;
     }
 
     /**
      * @return Style
      */
-    public function getStyle()
+    public function getStyle(): ?Style
     {
         return $this->style;
     }
@@ -112,7 +143,11 @@ class Cell
      */
     public function getType()
     {
-        return $this->type;
+        if (!empty($this->type)) {
+            return $this->type;
+        } else {
+            return $this->type = $this->detectType($this->value);
+        }
     }
 
     /**
@@ -131,71 +166,24 @@ class Cell
      */
     protected function detectType($value)
     {
-        if (CellTypeHelper::isBoolean($value)) {
+        if (is_bool($value)) {
             return self::TYPE_BOOLEAN;
         }
-        if (CellTypeHelper::isEmpty($value)) {
+        if (empty($value)) {
             return self::TYPE_EMPTY;
         }
-        if (CellTypeHelper::isNumeric($value)) {
+        if (is_int($value) || is_float($value) || is_bool($value)) {
             return self::TYPE_NUMERIC;
         }
-        if (CellTypeHelper::isDateTimeOrDateInterval($value)) {
+        if ($value instanceof \DateTime ||
+            $value instanceof \DateInterval) {
             return self::TYPE_DATE;
         }
-        if (CellTypeHelper::isNonEmptyString($value)) {
+        if (is_string($value)) {
             return self::TYPE_STRING;
         }
 
         return self::TYPE_ERROR;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isBoolean()
-    {
-        return $this->type === self::TYPE_BOOLEAN;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isEmpty()
-    {
-        return $this->type === self::TYPE_EMPTY;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isNumeric()
-    {
-        return $this->type === self::TYPE_NUMERIC;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isString()
-    {
-        return $this->type === self::TYPE_STRING;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isDate()
-    {
-        return $this->type === self::TYPE_DATE;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isError()
-    {
-        return $this->type === self::TYPE_ERROR;
     }
 
     /**

@@ -1,13 +1,13 @@
 <?php
 
-namespace Box\Spout\Reader\XLSX\Creator;
+namespace Box\Spout3\Reader\XLSX\Creator;
 
-use Box\Spout\Reader\Common\Manager\RowManager;
-use Box\Spout\Reader\XLSX\Manager\SharedStringsCaching\CachingStrategyFactory;
-use Box\Spout\Reader\XLSX\Manager\SharedStringsManager;
-use Box\Spout\Reader\XLSX\Manager\SheetManager;
-use Box\Spout\Reader\XLSX\Manager\StyleManager;
-use Box\Spout\Reader\XLSX\Manager\WorkbookRelationshipsManager;
+use Box\Spout3\Reader\Common\Manager\RowManager;
+use Box\Spout3\Reader\XLSX\Manager\SharedStringsCaching\CachingStrategyFactory;
+use Box\Spout3\Reader\XLSX\Manager\SharedStringsManager;
+use Box\Spout3\Reader\XLSX\Manager\SheetManager;
+use Box\Spout3\Reader\XLSX\Manager\StyleManager;
+use Box\Spout3\Reader\XLSX\Manager\WorkbookRelationshipsManager;
 
 /**
  * Class ManagerFactory
@@ -70,8 +70,8 @@ class ManagerFactory
 
     /**
      * @param string $filePath Path of the XLSX file being read
-     * @param \Box\Spout\Common\Manager\OptionsManagerInterface $optionsManager Reader's options manager
-     * @param \Box\Spout\Reader\XLSX\Manager\SharedStringsManager $sharedStringsManager Manages shared strings
+     * @param \Box\Spout3\Common\Manager\OptionsManagerInterface $optionsManager Reader's options manager
+     * @param \Box\Spout3\Reader\XLSX\Manager\SharedStringsManager $sharedStringsManager Manages shared strings
      * @param InternalEntityFactory $entityFactory Factory to create entities
      * @return SheetManager
      */

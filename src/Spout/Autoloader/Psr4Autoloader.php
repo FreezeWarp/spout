@@ -1,6 +1,6 @@
 <?php
 
-namespace Box\Spout\Autoloader;
+namespace Box\Spout3\Autoloader;
 
 /**
  * Class Psr4Autoloader

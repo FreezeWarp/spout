@@ -1,6 +1,6 @@
 <?php
 
-namespace Box\Spout\Reader\Common\Entity;
+namespace Box\Spout3\Reader\Common\Entity;
 
 /**
  * Class Options

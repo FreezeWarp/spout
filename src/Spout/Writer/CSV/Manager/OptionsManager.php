@@ -1,9 +1,9 @@
 <?php
 
-namespace Box\Spout\Writer\CSV\Manager;
+namespace Box\Spout3\Writer\CSV\Manager;
 
-use Box\Spout\Common\Manager\OptionsManagerAbstract;
-use Box\Spout\Writer\Common\Entity\Options;
+use Box\Spout3\Common\Manager\OptionsManagerAbstract;
+use Box\Spout3\Writer\Common\Entity\Options;
 
 /**
  * Class OptionsManager

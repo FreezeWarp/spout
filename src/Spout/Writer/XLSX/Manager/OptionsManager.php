@@ -1,10 +1,10 @@
 <?php
 
-namespace Box\Spout\Writer\XLSX\Manager;
+namespace Box\Spout3\Writer\XLSX\Manager;
 
-use Box\Spout\Common\Manager\OptionsManagerAbstract;
-use Box\Spout\Writer\Common\Creator\Style\StyleBuilder;
-use Box\Spout\Writer\Common\Entity\Options;
+use Box\Spout3\Common\Manager\OptionsManagerAbstract;
+use Box\Spout3\Writer\Common\Creator\Style\StyleBuilder;
+use Box\Spout3\Writer\Common\Entity\Options;
 
 /**
  * Class OptionsManager
@@ -47,13 +47,7 @@ class OptionsManager extends OptionsManagerAbstract
      */
     protected function setDefaultOptions()
     {
-        $defaultRowStyle = $this->styleBuilder
-            ->setFontSize(self::DEFAULT_FONT_SIZE)
-            ->setFontName(self::DEFAULT_FONT_NAME)
-            ->build();
-
         $this->setOption(Options::TEMP_FOLDER, sys_get_temp_dir());
-        $this->setOption(Options::DEFAULT_ROW_STYLE, $defaultRowStyle);
         $this->setOption(Options::SHOULD_CREATE_NEW_SHEETS_AUTOMATICALLY, true);
         $this->setOption(Options::SHOULD_USE_INLINE_STRINGS, true);
     }

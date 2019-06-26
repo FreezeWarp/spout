@@ -1,18 +1,18 @@
 <?php
 
-namespace Box\Spout\Writer\ODS\Manager;
+namespace Box\Spout3\Writer\ODS\Manager;
 
-use Box\Spout\Common\Entity\Cell;
-use Box\Spout\Common\Entity\Row;
-use Box\Spout\Common\Entity\Style\Style;
-use Box\Spout\Common\Exception\InvalidArgumentException;
-use Box\Spout\Common\Exception\IOException;
-use Box\Spout\Common\Helper\Escaper\ODS as ODSEscaper;
-use Box\Spout\Common\Helper\StringHelper;
-use Box\Spout\Writer\Common\Entity\Worksheet;
-use Box\Spout\Writer\Common\Manager\Style\StyleMerger;
-use Box\Spout\Writer\Common\Manager\WorksheetManagerInterface;
-use Box\Spout\Writer\ODS\Manager\Style\StyleManager;
+use Box\Spout3\Common\Entity\Cell;
+use Box\Spout3\Common\Entity\Row;
+use Box\Spout3\Common\Entity\Style\Style;
+use Box\Spout3\Common\Exception\InvalidArgumentException;
+use Box\Spout3\Common\Exception\IOException;
+use Box\Spout3\Common\Helper\Escaper\ODS as ODSEscaper;
+use Box\Spout3\Common\Helper\StringHelper;
+use Box\Spout3\Writer\Common\Entity\Worksheet;
+use Box\Spout3\Writer\Common\Manager\Style\StyleMerger;
+use Box\Spout3\Writer\Common\Manager\WorksheetManagerInterface;
+use Box\Spout3\Writer\ODS\Manager\Style\StyleManager;
 
 /**
  * Class WorksheetManager
@@ -20,7 +20,7 @@ use Box\Spout\Writer\ODS\Manager\Style\StyleManager;
  */
 class WorksheetManager implements WorksheetManagerInterface
 {
-    /** @var \Box\Spout\Common\Helper\Escaper\ODS Strings escaper */
+    /** @var \Box\Spout3\Common\Helper\Escaper\ODS Strings escaper */
     private $stringsEscaper;
 
     /** @var StringHelper String helper */
@@ -56,7 +56,7 @@ class WorksheetManager implements WorksheetManagerInterface
      * Prepares the worksheet to accept data
      *
      * @param Worksheet $worksheet The worksheet to start
-     * @throws \Box\Spout\Common\Exception\IOException If the sheet data file cannot be opened for writing
+     * @throws \Box\Spout3\Common\Exception\IOException If the sheet data file cannot be opened for writing
      * @return void
      */
     public function startSheet(Worksheet $worksheet)

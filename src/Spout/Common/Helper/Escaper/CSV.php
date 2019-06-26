@@ -1,6 +1,6 @@
 <?php
 
-namespace Box\Spout\Common\Helper\Escaper;
+namespace Box\Spout3\Common\Helper\Escaper;
 
 /**
  * Class CSV
