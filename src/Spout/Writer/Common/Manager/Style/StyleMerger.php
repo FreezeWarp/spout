@@ -89,8 +89,11 @@ class StyleMerger
         if (!$style->hasSetWrapText() && $baseStyle->shouldWrapText()) {
             $styleToUpdate->setShouldWrapText();
         }
-        if (!$style->getBorder() && $baseStyle->shouldApplyBorder()) {
-            $styleToUpdate->setBorder($baseStyle->getBorder());
+        if ($style->shouldApplyBorder() || $baseStyle->shouldApplyBorder()) {
+            $styleToUpdate->setBorder(new \Box\Spout3\Common\Entity\Style\Border(array_merge(
+                $baseStyle->getBorder() ? $baseStyle->getBorder()->getParts() : [],
+                $style->getBorder()     ? $style->getBorder()->getParts()     : []
+            )));
         }
         if (!$style->shouldApplyBackgroundColor() && $baseStyle->shouldApplyBackgroundColor()) {
             $styleToUpdate->setBackgroundColor($baseStyle->getBackgroundColor());
