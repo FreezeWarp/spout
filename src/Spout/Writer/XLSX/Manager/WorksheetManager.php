@@ -115,16 +115,16 @@ EOD;
 
         // Open the file pointer for the sheet
         $worksheet->active_sheet_file_pointer = $this->throwIfSheetFilePointerIsNotAvailable(
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen_buffered($worksheet->getFilePath(), 'w')
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen($worksheet->getFilePath(), 'w')
         );
 
         // Begin writing the sheet
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheet->active_sheet_file_pointer, self::SHEET_XML_FILE_HEADER);
+        fwrite($worksheet->active_sheet_file_pointer, self::SHEET_XML_FILE_HEADER);
 
 
         // Open the file pointer for the sheet rels
         $worksheet->active_sheet_rels_file_pointer = $this->throwIfSheetFilePointerIsNotAvailable(
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen_buffered(
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen(
                 dirname($worksheet->getFilePath())
                     . '/_rels/'
                     . basename($worksheet->getFilePath())
@@ -139,7 +139,7 @@ EOD;
 
 
         // Link the drawings into the sheet rels
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered(
+        fwrite(
             $worksheet->active_sheet_rels_file_pointer,
             '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
                 . "\n"
@@ -149,7 +149,7 @@ EOD;
 
         // Open the drawings file
         $worksheet->active_drawing_file_pointer = $this->throwIfSheetFilePointerIsNotAvailable(
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen_buffered(
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen(
                 dirname($worksheet->getFilePath())
                     . '/../drawings/'
                     . $drawings_name,
@@ -158,7 +158,7 @@ EOD;
         );
 
         // Start the drawings file
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered(
+        fwrite(
             $worksheet->active_drawing_file_pointer,
             '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
                 . "\n"
@@ -168,7 +168,7 @@ EOD;
 
         // Open the drawings rels file (this links drawing XML objects to physical image files)
         $worksheet->active_drawing_rels_file_pointer = $this->throwIfSheetFilePointerIsNotAvailable(
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen_buffered(
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen(
                 dirname($worksheet->getFilePath())
                     . '/../drawings/_rels/'
                     . $drawings_name
@@ -179,7 +179,7 @@ EOD;
 
 
         // Start the drawings rels file
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered(
+        fwrite(
             $worksheet->active_drawing_rels_file_pointer,
             '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
                 . "\n"
@@ -208,7 +208,7 @@ EOD;
             $bottomRight = self::getCellOffset($xpos + 1, $ypos);
 
             // Disables copy/paste, I don't know why
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheet->active_sheet_file_pointer, '
+            fwrite($worksheet->active_sheet_file_pointer, '
                 <sheetViews>
                     <sheetView tabSelected="1" workbookViewId="0">
                         <pane xSplit="' . $xpos . '" ySplit="' . $ypos . '" topLeftCell="' . $bottomRight . '" activePane="bottomRight" state="frozen" />
@@ -224,21 +224,30 @@ EOD;
 
         // Apply column widths, if applicable
         if (!empty($worksheet->getOption('column_widths'))) {
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheet->active_sheet_file_pointer, '<cols>');
+            $auto_widths = [];
+
+            fwrite($worksheet->active_sheet_file_pointer, '<cols>');
 
             foreach ($worksheet->getOption('column_widths') AS $i => $width) {
                 if ($width) {
-                    \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheet->active_sheet_file_pointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" width="' . $width . '" customWidth="1" />');
+                    if ($width === 'auto') {
+                        $worksheet->setOption("auto_width_{$i}_max_width", 10);
+                        $worksheet->setOption("auto_width_{$i}_position", ftell($worksheet->active_sheet_file_pointer));
+
+                        $width = "000";
+                    }
+
+                    fwrite($worksheet->active_sheet_file_pointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" width="' . $width . '" customWidth="1" />');
                 }
             }
 
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheet->active_sheet_file_pointer, '</cols>');
+            fwrite($worksheet->active_sheet_file_pointer, '</cols>');
         }
 
 
 
         // Begin the <sheetData> XML block
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheet->active_sheet_file_pointer, '<sheetData>');
+        fwrite($worksheet->active_sheet_file_pointer, '<sheetData>');
     }
 
     /**
@@ -310,7 +319,7 @@ EOD;
 
         $rowXML .= '</row>';
 
-        $wasWriteSuccessful = \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheet->getFilePointer(), $rowXML);
+        $wasWriteSuccessful = fwrite($worksheet->getFilePointer(), $rowXML);
         if ($wasWriteSuccessful === false) {
             throw new IOException("Unable to write data in {$worksheet->getFilePath()}");
         }
@@ -397,6 +406,13 @@ EOD;
         switch ($cell->getType()) {
             case Cell::TYPE_STRING:
                 $cellXML .= $this->getCellXMLFragmentForNonEmptyString($cell->getValue());
+
+                if ($rowIndex > 1 && $worksheet->getOption("auto_width_{$cellNumber}_max_width")) {
+                    $worksheet->setOption("auto_width_{$cellNumber}_max_width", max(
+                        $worksheet->getOption("auto_width_{$cellNumber}_max_width"),
+                        ... array_map('\strlen', explode("\n", $cell->getValue()))
+                    ));
+                }
                 break;
 
             case Cell::TYPE_BOOLEAN:
@@ -459,14 +475,14 @@ EOD;
             return;
         }
 
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheet->active_sheet_file_pointer, '</sheetData>');
+        fwrite($worksheet->active_sheet_file_pointer, '</sheetData>');
 
         if ($worksheet->getOption('filter') && $worksheet->getMaxNumColumns()) {
 
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheet->active_sheet_file_pointer, '<autoFilter ref="A1:ZZ1"/>');
+            fwrite($worksheet->active_sheet_file_pointer, '<autoFilter ref="A1:ZZ1"/>');
 
             if ($worksheet->tooltips) {
-                \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered(
+                fwrite(
                     $worksheet->active_sheet_file_pointer,
                     '<dataValidations count="' . \count($worksheet->tooltips) . '">'
                         . array_map(
@@ -512,7 +528,7 @@ EOD;
                         $image_name = sha1($image) . '-' . basename($image);
 
                         // Write the anchor to the drawings file
-                        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheet->active_drawing_file_pointer, '
+                        fwrite($worksheet->active_drawing_file_pointer, '
                             <xdr:twoCellAnchor>
                                 <xdr:from>
                                     <xdr:col>' . $cellNumber . '</xdr:col>
@@ -556,7 +572,7 @@ EOD;
                         ');
 
                         // Write the relationship to the rels file
-                        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered(
+                        fwrite(
                             $worksheet->active_drawing_rels_file_pointer,
                             '<Relationship Id="rId' . $worksheet->current_image_offset . '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/' . $image_name . '" />'
                         );
@@ -584,23 +600,30 @@ EOD;
         }
 
 
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheet->active_sheet_file_pointer, '<drawing r:id="rId1"/>');
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered($worksheet->active_sheet_file_pointer, '</worksheet>');
+        // Finish up our worksheet file
+        fwrite($worksheet->active_sheet_file_pointer, '<drawing r:id="rId1"/>');
+        fwrite($worksheet->active_sheet_file_pointer, '</worksheet>');
 
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered(
-            $worksheet->active_drawing_file_pointer,
-            '</xdr:wsDr>'
-        );
+        // Finish up our drawing file
+        fwrite($worksheet->active_drawing_file_pointer, '</xdr:wsDr>');
 
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fwrite_buffered(
-            $worksheet->active_drawing_rels_file_pointer,
-            '</Relationships>'
-        );
+        // Finish up our drawing rels file
+        fwrite($worksheet->active_drawing_rels_file_pointer, '</Relationships>');
 
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose_buffered($worksheet->active_sheet_file_pointer);
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose_buffered($worksheet->active_sheet_rels_file_pointer);
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose_buffered($worksheet->active_drawing_file_pointer);
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose_buffered($worksheet->active_drawing_rels_file_pointer);
+
+        // go back and insert calculated auto column widths
+        foreach ($worksheet->getOption('column_widths') AS $i => $width) {
+            if ($width === 'auto') {
+                fseek($worksheet->active_sheet_file_pointer, $worksheet->getOption("auto_width_{$i}_position"));
+                fwrite($worksheet->active_sheet_file_pointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" width="' . str_pad(.9 * min(120, $worksheet->getOption("auto_width_{$i}_max_width")), 3, '0', STR_PAD_LEFT) . '" customWidth="1" />');
+            }
+        }
+
+
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose($worksheet->active_sheet_file_pointer);
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose($worksheet->active_sheet_rels_file_pointer);
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose($worksheet->active_drawing_file_pointer);
+        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose($worksheet->active_drawing_rels_file_pointer);
 
     }
 

@@ -1,16 +1,19 @@
 # Spout
 
-[![Latest Stable Version](https://poser.pugx.org/box/spout/v/stable)](https://packagist.org/packages/box/spout)
-[![Project Status](http://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges)
-[![Build Status](https://travis-ci.org/box/spout.svg?branch=master)](https://travis-ci.org/box/spout)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/box/spout/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/box/spout/?branch=master)
-[![Code Coverage](https://scrutinizer-ci.com/g/box/spout/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/box/spout/?branch=master)
-[![Total Downloads](https://poser.pugx.org/box/spout/downloads)](https://packagist.org/packages/box/spout)
+## Fork Notes
 
-Spout is a PHP library to read and write spreadsheet files (CSV, XLSX and ODS), in a fast and scalable way.
-Contrary to other file readers or writers, it is capable of processing very large files while keeping the memory usage really low (less than 3MB).
+This is a somewhat messy fork of the Box/Spout library. It is forked from a version of the Spout 3.0 development branch, though we'll eventually try and catch back up to their recent master release.
 
-Join the community and come discuss about Spout: [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/box/spout?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+At a high-level, we try to implement features we desired in a way that was largely compatible with upstream code, and that maintained Spout's general pattern of being light on memory and reasonably efficient. As we mostly focus on XLSX export functionality, no changes have been made to ODS or CSV functionality, nor have any changes been made with how XLSX files are read.
+
+With this in mind, the following is the list of notable changes in this fork:
+
+  1. Worksheet adds a `getOption` and `setOption` method, which is used to set various arbitrary options on worksheets.
+  2. Cell style merging logic has been optimized. It was slow.
+  3. A cell type has been added for images. When used, this will embed an image into the cell without overflowing into other cells. The cell's value should be set to the URL of an image. We use Guzzle with batch downloading to try to speed up this functionality as much as possible.
+  4. Frozen panes have been added. The `freeze_pane` worksheet option can be passed an x and y coordinate for where to freeze. For instance, `$worksheet->setOption('freeze_pane', [2, 2])` would freeze at the C3 cell.
+  5. Worksheet column widths can be set with the `column_widths` option. This should be an array of widths, one for each column. For instance, `$worksheet->setOption('column_widths', [10, 20, 40])`. The value `'auto'` can be used to perform automatic column width calculation, as in `$worksheet->setOption('column_widths', [10, 20, 'auto'])`; this is implemented using a very lazy algorithm for speed -- we simply find the greatest number of characters in any given cell to determine what width should be used for a column.
+  6. Autofiltering can be enabled for all columns by setting the `filter` option, e.g. `$worksheet->setOption('filter', true)`.
 
 
 ## Documentation
