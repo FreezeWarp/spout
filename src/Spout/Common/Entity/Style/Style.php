@@ -11,7 +11,7 @@ class Style
     /** Default font values */
     const DEFAULT_FONT_SIZE = 11;
     const DEFAULT_FONT_COLOR = Color::BLACK;
-    const DEFAULT_FONT_NAME = 'Arial';
+    const DEFAULT_FONT_NAME = 'Calibri';
 
     /** @var int|null Style ID */
     private $id;
