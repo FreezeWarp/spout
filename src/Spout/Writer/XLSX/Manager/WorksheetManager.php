@@ -615,7 +615,7 @@ EOD;
         foreach ($worksheet->getOption('column_widths') AS $i => $width) {
             if ($width === 'auto') {
                 fseek($worksheet->active_sheet_file_pointer, $worksheet->getOption("auto_width_{$i}_position"));
-                fwrite($worksheet->active_sheet_file_pointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" width="' . str_pad(.9 * min(120, $worksheet->getOption("auto_width_{$i}_max_width")), 3, '0', STR_PAD_LEFT) . '" customWidth="1" />');
+                fwrite($worksheet->active_sheet_file_pointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" width="' . str_pad(ceil(.9 * min(80, $worksheet->getOption("auto_width_{$i}_max_width"))), 3, '0', STR_PAD_LEFT) . '" customWidth="1" />');
             }
         }
 
