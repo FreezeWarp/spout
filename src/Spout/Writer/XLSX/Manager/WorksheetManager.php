@@ -450,8 +450,13 @@ EOD;
      */
     private function getCellXMLFragmentForNonEmptyString($cellValue)
     {
-        if ($this->stringHelper->getStringLength($cellValue) > self::MAX_CHARACTERS_PER_CELL) {
-            throw new InvalidArgumentException('Trying to add a value that exceeds the maximum number of characters allowed in a cell (32,767)');
+
+        // we use strlen for performance reasons -- it is potentially much faster than mb_strlen. we then use mb_substr to back things up
+        if (
+            strlen($cellValue) > self::MAX_CHARACTERS_PER_CELL // faster to eval
+            && mb_strlen($cellValue) > self::MAX_CHARACTERS_PER_CELL // now double-check
+        ) {
+            $cellValue = mb_substr($cellValue, 0, self::MAX_CHARACTERS_PER_CELL - 5) . ' ...';
         }
 
         if ($this->shouldUseInlineStrings) {
@@ -462,6 +467,7 @@ EOD;
         }
 
         return $cellXMLFragment;
+
     }
 
 
