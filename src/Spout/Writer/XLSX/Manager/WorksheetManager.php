@@ -499,9 +499,6 @@ EOD;
                     . '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/' . $drawings_name . '"/></Relationships>'
                 );
 
-                // Let the worksheet know what its file pointer is
-                $worksheet->setFilePointer($worksheet->active_sheet_file_pointer);
-
             }
 
             $client = new \GuzzleHttp\Client();
@@ -602,11 +599,13 @@ EOD;
             // (needs to be after promise->wait(), since we reference queued_images in there)
             $worksheet->queued_images = [];
 
+            // Create a reference to the drawings rels
+            fwrite($worksheet->active_sheet_file_pointer, '<drawing r:id="rId1"/>');
+
         }
 
 
         // Finish up our worksheet file
-        fwrite($worksheet->active_sheet_file_pointer, '<drawing r:id="rId1"/>');
         fwrite($worksheet->active_sheet_file_pointer, '</worksheet>');
 
 
