@@ -122,75 +122,6 @@ EOD;
         fwrite($worksheet->active_sheet_file_pointer, self::SHEET_XML_FILE_HEADER);
 
 
-        // Open the file pointer for the sheet rels
-        $worksheet->active_sheet_rels_file_pointer = $this->throwIfSheetFilePointerIsNotAvailable(
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen(
-                dirname($worksheet->getFilePath())
-                    . '/_rels/'
-                    . basename($worksheet->getFilePath())
-                    . '.rels'
-                , 'w'
-            )
-        );
-
-
-        // Derive the drawings file name from the sheet name
-        $drawings_name = str_replace('sheet', 'drawing', basename($worksheet->getFilePath()));
-
-
-        // Link the drawings into the sheet rels
-        fwrite(
-            $worksheet->active_sheet_rels_file_pointer,
-            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-                . "\n"
-                . '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/' . $drawings_name . '"/></Relationships>'
-        );
-
-
-        // Open the drawings file
-        $worksheet->active_drawing_file_pointer = $this->throwIfSheetFilePointerIsNotAvailable(
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen(
-                dirname($worksheet->getFilePath())
-                    . '/../drawings/'
-                    . $drawings_name,
-                'w'
-            )
-        );
-
-        // Start the drawings file
-        fwrite(
-            $worksheet->active_drawing_file_pointer,
-            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-                . "\n"
-                . '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">'
-        );
-
-
-        // Open the drawings rels file (this links drawing XML objects to physical image files)
-        $worksheet->active_drawing_rels_file_pointer = $this->throwIfSheetFilePointerIsNotAvailable(
-            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen(
-                dirname($worksheet->getFilePath())
-                    . '/../drawings/_rels/'
-                    . $drawings_name
-                    . '.rels',
-                'w'
-            )
-        );
-
-
-        // Start the drawings rels file
-        fwrite(
-            $worksheet->active_drawing_rels_file_pointer,
-            '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
-                . "\n"
-                . '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
-        );
-
-
-        // Let the worksheet know what its file pointer is
-        $worksheet->setFilePointer($worksheet->active_sheet_file_pointer);
-
-
         // Let the worksheet know what options are applied to it
         foreach ($options AS $option => $value) {
             $worksheet->setOption($option, $value);
@@ -319,8 +250,7 @@ EOD;
 
         $rowXML .= '</row>';
 
-        $wasWriteSuccessful = fwrite($worksheet->getFilePointer(), $rowXML);
-        if ($wasWriteSuccessful === false) {
+        if (fwrite($worksheet->active_sheet_file_pointer, $rowXML) === false) {
             throw new IOException("Unable to write data in {$worksheet->getFilePath()}");
         }
     }
@@ -506,6 +436,74 @@ EOD;
 
         // Resolve every image that is being inserted
         if (!empty($worksheet->queued_images)) {
+
+            if (!$worksheet->active_drawing_file_pointer) {
+
+                // Derive the drawings file name from the sheet name
+                $drawings_name = str_replace('sheet', 'drawing', basename($worksheet->getFilePath()));
+
+                // Open the drawings file
+                $worksheet->active_drawing_file_pointer = $this->throwIfSheetFilePointerIsNotAvailable(
+                    \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen(
+                        dirname($worksheet->getFilePath())
+                        . '/../drawings/'
+                        . $drawings_name,
+                        'w'
+                    )
+
+                );
+
+                // Start the drawings file
+                fwrite(
+                    $worksheet->active_drawing_file_pointer,
+                    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+                    . "\n"
+                    . '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">'
+                );
+
+                // Open the drawings rels file (this links drawing XML objects to physical image files)
+                $worksheet->active_drawing_rels_file_pointer = $this->throwIfSheetFilePointerIsNotAvailable(
+                    \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen(
+                        dirname($worksheet->getFilePath())
+                        . '/../drawings/_rels/'
+                        . $drawings_name
+                        . '.rels',
+                        'w'
+                    )
+                );
+
+                // Start the drawings rels file
+                fwrite(
+                    $worksheet->active_drawing_rels_file_pointer,
+                    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+                    . "\n"
+                    . '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+                );
+
+                // Open the file pointer for the sheet rels
+                $worksheet->active_sheet_rels_file_pointer = $this->throwIfSheetFilePointerIsNotAvailable(
+                    \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fopen(
+                        dirname($worksheet->getFilePath())
+                        . '/_rels/'
+                        . basename($worksheet->getFilePath())
+                        . '.rels'
+                        , 'w'
+                    )
+                );
+
+                // Link the drawings into the sheet rels
+                fwrite(
+                    $worksheet->active_sheet_rels_file_pointer,
+                    '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+                    . "\n"
+                    . '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/' . $drawings_name . '"/></Relationships>'
+                );
+
+                // Let the worksheet know what its file pointer is
+                $worksheet->setFilePointer($worksheet->active_sheet_file_pointer);
+
+            }
+
             $client = new \GuzzleHttp\Client();
 
             $pool = new \GuzzleHttp\Pool(
@@ -603,18 +601,13 @@ EOD;
             // Empty the queued images now that we've processed them
             // (needs to be after promise->wait(), since we reference queued_images in there)
             $worksheet->queued_images = [];
+
         }
 
 
         // Finish up our worksheet file
         fwrite($worksheet->active_sheet_file_pointer, '<drawing r:id="rId1"/>');
         fwrite($worksheet->active_sheet_file_pointer, '</worksheet>');
-
-        // Finish up our drawing file
-        fwrite($worksheet->active_drawing_file_pointer, '</xdr:wsDr>');
-
-        // Finish up our drawing rels file
-        fwrite($worksheet->active_drawing_rels_file_pointer, '</Relationships>');
 
 
         // go back and insert calculated auto column widths
@@ -627,9 +620,21 @@ EOD;
 
 
         \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose($worksheet->active_sheet_file_pointer);
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose($worksheet->active_sheet_rels_file_pointer);
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose($worksheet->active_drawing_file_pointer);
-        \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose($worksheet->active_drawing_rels_file_pointer);
+
+
+        if ($worksheet->active_drawing_file_pointer) {
+
+            // Finish up our drawing file
+            fwrite($worksheet->active_drawing_file_pointer, '</xdr:wsDr>');
+
+            // Finish up our drawing rels file
+            fwrite($worksheet->active_drawing_rels_file_pointer, '</Relationships>');
+
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose($worksheet->active_drawing_file_pointer);
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose($worksheet->active_drawing_rels_file_pointer);
+            \Box\Spout3\Common\Helper\GlobalFunctionsHelper::fclose($worksheet->active_sheet_rels_file_pointer);
+
+        }
 
     }
 
