@@ -187,6 +187,22 @@ class Cell
     }
 
     /**
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        return $this->type === self::TYPE_EMPTY;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isError()
+    {
+        return $this->type === self::TYPE_ERROR;
+    }
+
+    /**
      * @return string
      */
     public function __toString()
