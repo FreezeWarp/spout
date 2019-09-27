@@ -162,13 +162,14 @@ EOD;
             foreach ($worksheet->getOption('column_widths') AS $i => $width) {
                 if ($width) {
                     if ($width === 'auto') {
-                        $worksheet->setOption("auto_width_{$i}_max_width", 10);
+                        $worksheet->setOption("auto_width_{$i}", true);
+                        $worksheet->setOption("auto_width_{$i}_max_width", 0);
                         $worksheet->setOption("auto_width_{$i}_position", ftell($worksheet->active_sheet_file_pointer));
 
                         $width = "000";
                     }
 
-                    fwrite($worksheet->active_sheet_file_pointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" width="' . $width . '" customWidth="1" />');
+                    fwrite($worksheet->active_sheet_file_pointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" hidden="0" width="' . $width . '" customWidth="1" />');
                 }
             }
 
@@ -337,7 +338,7 @@ EOD;
             case Cell::TYPE_STRING:
                 $cellXML .= $this->getCellXMLFragmentForNonEmptyString($cell->getValue());
 
-                if ($rowIndex > 1 && $worksheet->getOption("auto_width_{$cellNumber}_max_width")) {
+                if ($rowIndex > 1 && $worksheet->getOption("auto_width_{$cellNumber}")) {
                     $worksheet->setOption("auto_width_{$cellNumber}_max_width", max(
                         $worksheet->getOption("auto_width_{$cellNumber}_max_width"),
                         ... array_map('\strlen', explode("\n", $cell->getValue()))
@@ -613,7 +614,14 @@ EOD;
         foreach ($worksheet->getOption('column_widths') AS $i => $width) {
             if ($width === 'auto') {
                 fseek($worksheet->active_sheet_file_pointer, $worksheet->getOption("auto_width_{$i}_position"));
-                fwrite($worksheet->active_sheet_file_pointer, '<col min="' . ($i + 1) . '" max="' . ($i + 1) . '" width="' . str_pad(ceil(.9 * min(80, $worksheet->getOption("auto_width_{$i}_max_width"))), 3, '0', STR_PAD_LEFT) . '" customWidth="1" />');
+                fwrite(
+                    $worksheet->active_sheet_file_pointer,
+                    '<col min="' . ($i + 1) . '" '
+                        . 'max="' . ($i + 1) . '" '
+                        . 'hidden="' . ($worksheet->getOption("auto_hide_{$i}") && !$worksheet->getOption("auto_width_{$i}_max_width") ? 1 : 0) . '" '
+                        . 'width="' . str_pad(ceil(.9 * max(10, min(80, $worksheet->getOption("auto_width_{$i}_max_width")))), 3, '0', STR_PAD_LEFT) . '" '
+                        . 'customWidth="1" />'
+                );
             }
         }
 
