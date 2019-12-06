@@ -508,8 +508,7 @@ EOD;
                 $client,
                 array_map(
                     function($image) {
-                        // We proxy this request to enable caching. We override the default ttl, 12 hours, with a 7 day ttl -- for the purposes of this kind-of thing, we really don't care that much if the image is out-of-date.
-                        return new \GuzzleHttp\Psr7\Request('GET', 'https://hamr.mmm.com/proxy?ttl=604800&url=' . $image);
+                        return new \GuzzleHttp\Psr7\Request('GET', $image);
                     },
                     array_column($worksheet->queued_images, 2)
                 ),
